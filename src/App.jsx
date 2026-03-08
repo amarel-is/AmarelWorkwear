@@ -9,6 +9,7 @@ import Header from './components/Header'
 import BottomNav from './components/BottomNav'
 import CartDrawer from './components/CartDrawer'
 import Toast from './components/Toast'
+import AdminPanel from './components/AdminPanel'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -23,7 +24,9 @@ const pageTransition = {
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [currentPage, setCurrentPage] = useState('catalog')
+  const [currentPage, setCurrentPage] = useState(
+    window.location.pathname === '/admin' ? 'admin' : 'catalog'
+  )
   const [cartItems, setCartItems] = useState([])
   const [user, setUser] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -86,6 +89,10 @@ function App() {
 
   const getCartCount = () =>
     cartItems.reduce((total, item) => total + item.quantity, 0)
+
+  if (currentPage === 'admin') {
+    return <AdminPanel onBack={() => setCurrentPage('catalog')} />
+  }
 
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />
@@ -152,6 +159,19 @@ function App() {
                 pushToast('ההזמנה נשלחה בהצלחה!', 'תודה על ההזמנה')
               }}
             />
+          </motion.div>
+        )}
+
+        {currentPage === 'admin' && (
+          <motion.div
+            key="admin"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={pageTransition}
+          >
+            <AdminPanel onBack={() => setCurrentPage('catalog')} />
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ordersApi } from '../lib/airtable'
 import './Checkout.css'
 
 const WEBHOOK_URL = 'https://hook.eu2.make.com/REPLACE_WITH_YOUR_WEBHOOK_URL'
@@ -86,21 +87,38 @@ function Checkout({ cartItems, user, onComplete }) {
     }
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const webhookPromise = fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderPayload)
-      })
+      }).catch(err => console.error('Webhook error:', err))
 
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`)
+      const airtableFields = {
+        order_id: orderId,
+        customer_name: formData.fullName,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        department: formData.department,
+        site: formData.site || '',
+        items_json: JSON.stringify(orderPayload.items),
+        total_items: orderPayload.summary.totalItems,
+        subtotal: orderPayload.summary.subtotal,
+        vat: orderPayload.summary.vat,
+        total: orderPayload.summary.total,
+        notes: formData.notes || '',
+        status: 'pending'
       }
+
+      const airtablePromise = ordersApi.create(airtableFields)
+        .catch(err => console.error('Airtable save error:', err))
+
+      await Promise.allSettled([webhookPromise, airtablePromise])
 
       setOrderResult({ orderId, payload: orderPayload })
       setStep('confirm')
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
-      console.error('Webhook error:', err)
+      console.error('Order submission error:', err)
       setOrderResult({ orderId, payload: orderPayload })
       setStep('confirm')
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -114,13 +132,12 @@ function Checkout({ cartItems, user, onComplete }) {
   return (
     <div className="checkout">
       <div className="checkout-container">
-        {/* Step indicator */}
         <div className="checkout-steps">
           {STEPS.map((s, i) => (
             <div key={s.id} className={`step ${i <= stepIndex ? 'active' : ''} ${i < stepIndex ? 'done' : ''}`}>
               <div className="step-circle">
                 {i < stepIndex ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                 ) : s.icon}
               </div>
               <span className="step-label">{s.label}</span>
@@ -130,7 +147,6 @@ function Checkout({ cartItems, user, onComplete }) {
         </div>
 
         <AnimatePresence mode="wait">
-          {/* STEP 1: Details */}
           {step === 'details' && (
             <motion.div
               key="details"
@@ -144,7 +160,7 @@ function Checkout({ cartItems, user, onComplete }) {
                   <form ref={formRef} onSubmit={goToReview} className="checkout-form">
                     <div className="form-section">
                       <h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         פרטי מזמין
                       </h3>
 
@@ -188,19 +204,18 @@ function Checkout({ cartItems, user, onComplete }) {
                       whileTap={{ scale: 0.97 }}
                     >
                       המשך לאימות הזמנה
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
                     </motion.button>
                   </form>
                 </div>
 
                 <div className="order-summary-section">
-                  <OrderSummaryCard cartItems={cartItems} getTotalPrice={getTotalPrice} getTotalItems={getTotalItems} />
+                  <OrderSummaryCard cartItems={cartItems} getTotalPrice={getTotalPrice} />
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* STEP 2: Review */}
           {step === 'review' && (
             <motion.div
               key="review"
@@ -212,7 +227,7 @@ function Checkout({ cartItems, user, onComplete }) {
               <div className="review-page">
                 <div className="review-section">
                   <h3>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     פרטי מזמין
                   </h3>
                   <div className="review-grid">
@@ -223,14 +238,14 @@ function Checkout({ cartItems, user, onComplete }) {
                     {formData.site && <div className="review-field"><span className="review-label">אתר</span><span className="review-value">{formData.site}</span></div>}
                   </div>
                   <motion.button className="review-edit-btn" onClick={() => setStep('details')} whileTap={{ scale: 0.95 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     ערוך פרטים
                   </motion.button>
                 </div>
 
                 <div className="review-section">
                   <h3>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                     פריטים בהזמנה ({getTotalItems()})
                   </h3>
                   <div className="review-items-table">
@@ -287,7 +302,7 @@ function Checkout({ cartItems, user, onComplete }) {
                       <span className="spinner" />
                     ) : (
                       <>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                         שליחת הזמנה
                       </>
                     )}
@@ -297,7 +312,6 @@ function Checkout({ cartItems, user, onComplete }) {
             </motion.div>
           )}
 
-          {/* STEP 3: Confirmation */}
           {step === 'confirm' && orderResult && (
             <motion.div
               key="confirm"
@@ -312,7 +326,7 @@ function Checkout({ cartItems, user, onComplete }) {
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.2 }}
                 >
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                 </motion.div>
 
                 <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
@@ -326,15 +340,15 @@ function Checkout({ cartItems, user, onComplete }) {
 
                 <motion.div className="confirm-details" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                   <div className="confirm-detail-row">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span>{formData.fullName}</span>
                   </div>
                   <div className="confirm-detail-row">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                     <span>{formData.department}</span>
                   </div>
                   <div className="confirm-detail-row">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                     <span>{getTotalItems()} פריטים · ₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)} כולל מע״מ</span>
                   </div>
                 </motion.div>
@@ -365,10 +379,12 @@ function Checkout({ cartItems, user, onComplete }) {
   )
 }
 
-function OrderSummaryCard({ cartItems, getTotalPrice, getTotalItems }) {
+function OrderSummaryCard({ cartItems, getTotalPrice }) {
+  const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0)
+
   return (
     <div className="order-summary-card">
-      <h3>סיכום הזמנה</h3>
+      <h3>סיכום הזמנה ({totalItems} פריטים)</h3>
 
       <div className="summary-items">
         {cartItems.map(item => (
@@ -400,7 +416,7 @@ function OrderSummaryCard({ cartItems, getTotalPrice, getTotalItems }) {
       </div>
 
       <div className="summary-shipping-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         <span>הזמנות מתחת ל-750₪ – דמי משלוח 35₪</span>
       </div>
     </div>
