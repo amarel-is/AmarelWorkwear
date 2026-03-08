@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { productsApi, ordersApi } from '../lib/airtable'
+import { productsApi, ordersApi, uploadAttachment } from '../lib/airtable'
 import { WORKWEAR_CATEGORIES } from '../data/products'
 import './AdminPanel.css'
 
@@ -81,8 +81,25 @@ function ProductFormModal({ product, onSave, onClose, saving }) {
       sort_order: product.sort_order || 0
     }
   })
+  const [pendingFile, setPendingFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(product?.image || '')
+  const fileInputRef = useRef(null)
 
   const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPendingFile(file)
+    setPreviewUrl(URL.createObjectURL(file))
+  }
+
+  const handleRemoveImage = () => {
+    setPendingFile(null)
+    setPreviewUrl('')
+    set('image', '')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -92,8 +109,6 @@ function ProductFormModal({ product, onSave, onClose, saving }) {
       price: Number(form.price) || 0,
       category: form.category,
       description: form.description,
-      // Attachment field: wrap URL in array format Airtable expects
-      image: form.image ? [{ url: form.image }] : [],
       fabric: form.fabric || null,
       weight: form.weight || null,
       colors: form.colors ? form.colors.split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -102,7 +117,11 @@ function ProductFormModal({ product, onSave, onClose, saving }) {
       active: form.active,
       sort_order: Number(form.sort_order) || 0
     }
-    onSave(fields)
+    // Only include image field if no file upload is pending (file upload handled separately)
+    if (!pendingFile) {
+      fields.image = form.image ? [{ url: form.image }] : []
+    }
+    onSave(fields, pendingFile)
   }
 
   const categories = WORKWEAR_CATEGORIES.filter(c => c !== 'הכל')
@@ -142,10 +161,46 @@ function ProductFormModal({ product, onSave, onClose, saving }) {
             <span>תיאור</span>
             <textarea value={form.description} onChange={e => set('description', e.target.value)} rows={2} />
           </label>
-          <label>
-            <span>כתובת תמונה (URL)</span>
-            <input type="url" value={form.image} onChange={e => set('image', e.target.value)} />
-          </label>
+
+          {/* ── Photo upload ── */}
+          <div className="admin-photo-field">
+            <span className="admin-photo-label">תמונת מוצר</span>
+            <div className="admin-photo-row">
+              {previewUrl && (
+                <div className="admin-photo-preview">
+                  <img src={previewUrl} alt="תצוגה מקדימה" />
+                  <button type="button" className="admin-photo-remove" onClick={handleRemoveImage} title="הסר תמונה">✕</button>
+                </div>
+              )}
+              <div className="admin-photo-actions">
+                <button type="button" className="admin-btn admin-btn-secondary admin-photo-pick" onClick={() => fileInputRef.current?.click()}>
+                  {previewUrl ? 'החלף תמונה' : 'העלה תמונה'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="admin-photo-input-hidden"
+                  onChange={handleFileChange}
+                />
+                {!pendingFile && (
+                  <>
+                    <span className="admin-photo-or">או</span>
+                    <input
+                      type="url"
+                      placeholder="הדבק כתובת URL..."
+                      value={form.image}
+                      onChange={e => { set('image', e.target.value); setPreviewUrl(e.target.value) }}
+                      className="admin-photo-url-input"
+                    />
+                  </>
+                )}
+                {pendingFile && (
+                  <span className="admin-photo-filename">{pendingFile.name}</span>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="admin-form-row">
             <label>
               <span>הרכב בד</span>
@@ -231,13 +286,20 @@ function ProductsTab() {
     setEditingProduct(null)
   }
 
-  const handleSave = async (fields) => {
+  const handleSave = async (fields, pendingFile) => {
     setSaving(true)
     try {
+      let recordId
       if (editingProduct) {
         await productsApi.update(editingProduct.id, fields)
+        recordId = editingProduct.id
       } else {
-        await productsApi.create(fields)
+        const created = await productsApi.create(fields)
+        recordId = created.id
+      }
+      // Upload the image file after the record exists
+      if (pendingFile) {
+        await uploadAttachment(recordId, 'image', pendingFile)
       }
       closeForm()
       await fetchProducts()

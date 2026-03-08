@@ -124,6 +124,29 @@ async function deleteRecord(table, recordId) {
   await request(`${table}/${recordId}`, { method: 'DELETE' })
 }
 
+// Upload a File object as an attachment to an existing record.
+// Uses Airtable's content upload API (different base URL, no JSON content-type).
+export async function uploadAttachment(recordId, fieldName, file) {
+  const formData = new FormData()
+  formData.append('file', file, file.name)
+  formData.append('filename', file.name)
+  formData.append('contentType', file.type || 'application/octet-stream')
+
+  const res = await fetch(
+    `https://content.airtable.com/v0/${BASE_ID}/${recordId}/uploadAttachment/${encodeURIComponent(fieldName)}`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${PAT}` },
+      body: formData
+    }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error?.message || `Upload error ${res.status}`)
+  }
+  return res.json()
+}
+
 // ─── Products API ───
 
 export const productsApi = {
