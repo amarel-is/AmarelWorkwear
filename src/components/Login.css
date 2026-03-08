@@ -1,0 +1,129 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #17222D 0%, #2a3847 100%);
+  padding: var(--spacing-md);
+  gap: var(--spacing-lg);
+}
+
+.login-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+.login-card {
+  background: var(--background);
+  border-radius: var(--border-radius-large);
+  padding: var(--spacing-xl);
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.login-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: var(--spacing-xs);
+}
+
+.login-subtitle {
+  font-size: 1.1rem;
+  color: var(--secondary-color);
+  font-weight: 400;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.login-input {
+  padding: 16px 20px;
+  border: 2px solid #e5e5e7;
+  border-radius: var(--border-radius-small);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: #fafafa;
+  text-align: right;
+}
+
+.login-input:focus {
+  border-color: #F97316;
+  background: white;
+}
+
+.login-input::placeholder {
+  color: #86868b;
+}
+
+.error-message {
+  color: #ff3b30;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.login-button {
+  padding: 16px 24px;
+  background: #F97316;
+  color: white;
+  border-radius: var(--border-radius-small);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: var(--spacing-sm);
+}
+
+.login-button:hover {
+  background: #EA580C;
+}
+
+.login-footer {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+}
+
+.login-footer p {
+  font-size: 0.875rem;
+  color: var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    padding: var(--spacing-lg);
+  }
+
+  .login-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .login-logo-img {
+    height: 48px;
+  }
+}
