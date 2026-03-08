@@ -21,9 +21,9 @@ function CartDrawer({ isOpen, onClose, cartItems, updateQuantity, removeFromCart
           />
           <motion.div
             className="cart-drawer"
-            initial={{ x: '100%' }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           >
             <div className="drawer-header">

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import './Login.css'
 
-const LOGO_URL = 'https://www.amarel.net/wp-content/uploads/2024/03/Logo_Amarel_white-Orange-1.svg'
+const LOGO_URL = '/logo.png'
 
 function Login({ onLogin }) {
   const [idNumber, setIdNumber] = useState('')
