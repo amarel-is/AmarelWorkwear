@@ -18,6 +18,17 @@
 .header-logo {
   cursor: pointer;
   transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #86868b;
+  border-right: 1px solid #e5e5e7;
+  padding-right: 10px;
 }
 
 .header-logo:hover {
@@ -28,6 +39,48 @@
   height: 34px;
   width: auto;
   object-fit: contain;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-cart-btn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #f5f5f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  transition: background 0.15s;
+}
+
+.header-cart-btn:hover {
+  background: #e5e5e7;
+  transform: none;
+}
+
+.header-cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: #F97316;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.4);
 }
 
 .header-user {

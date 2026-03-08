@@ -1,85 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import './Cart.css'
 
-const MAX_ENTITLEMENTS = 1
-
-function EntitlementWidget({ used }) {
-  const ratio = Math.min(used / MAX_ENTITLEMENTS, 1)
-  const circumference = 2 * Math.PI * 38
-  const filled = circumference * ratio
-  const remaining = MAX_ENTITLEMENTS - used
-  const isFullyUsed = remaining <= 0
-
-  return (
-    <motion.div
-      className="entitlement-widget"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-    >
-      <div className="entitlement-ring-container">
-        <svg width="90" height="90" viewBox="0 0 90 90" className="entitlement-ring">
-          <circle
-            cx="45" cy="45" r="38"
-            fill="none"
-            stroke="#f0f0f2"
-            strokeWidth="6"
-          />
-          <motion.circle
-            cx="45" cy="45" r="38"
-            fill="none"
-            stroke={isFullyUsed ? '#F97316' : '#F97316'}
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: circumference - filled }}
-            transition={{ duration: 1.2, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            transform="rotate(-90 45 45)"
-          />
-        </svg>
-        <div className="entitlement-ring-text">
-          <motion.span
-            className="entitlement-ring-number"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.8 }}
-          >
-            {used}
-          </motion.span>
-          <span className="entitlement-ring-of">מתוך {MAX_ENTITLEMENTS}</span>
-        </div>
-      </div>
-      <div className="entitlement-info">
-        <h4 className="entitlement-title">
-          {isFullyUsed ? 'כל הזכאויות נוצלו' : 'ניצול זכאויות'}
-        </h4>
-        <p className="entitlement-desc">
-          {isFullyUsed
-            ? 'מעולה! בחרתם את כל המתנות שלכם'
-            : `נותרו עוד ${remaining} זכאויות לבחירה`
-          }
-        </p>
-        {isFullyUsed && (
-          <motion.span
-            className="entitlement-badge-full"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.2 }}
-          >
-            מומש במלואו
-          </motion.span>
-        )}
-      </div>
-    </motion.div>
-  )
-}
-
 function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
-  const totalItemTypes = cartItems.length
+  const getTotalPrice = () =>
+    cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+
+  const getTotalItems = () =>
+    cartItems.reduce((total, item) => total + item.quantity, 0)
 
   if (cartItems.length === 0) {
     return (
@@ -103,7 +30,7 @@ function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
               </svg>
             </motion.div>
             <h2>הסל שלך ריק</h2>
-            <p>הוסיפו מתנות מהקטלוג כדי להתחיל</p>
+            <p>הוסיפו פריטי ביגוד מהקטלוג כדי להתחיל</p>
             <motion.button
               className="continue-shopping-button"
               onClick={() => onNavigate('catalog')}
@@ -127,75 +54,104 @@ function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h2>סל הקניות שלי</h2>
-          <p>{cartItems.length} פריטים בסל</p>
+          <h2>סל ההזמנה</h2>
+          <p>{getTotalItems()} פריטים · {cartItems.length} סוגים</p>
         </motion.div>
-
-        <EntitlementWidget used={totalItemTypes} />
 
         <div className="cart-content">
           <div className="cart-items">
+            <div className="cart-items-header">
+              <span className="col-product">מוצר</span>
+              <span className="col-size">מידה</span>
+              <span className="col-price">מחיר</span>
+              <span className="col-qty">כמות</span>
+              <span className="col-total">סה״כ</span>
+              <span className="col-action"></span>
+            </div>
+
             <AnimatePresence mode="popLayout">
               {cartItems.map((item, index) => (
                 <motion.div
-                  key={item.id}
-                  className="cart-item"
+                  key={item.cartKey}
+                  className="cart-line"
                   initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -40, height: 0, marginBottom: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  exit={{ opacity: 0, x: -60, height: 0, margin: 0, padding: 0 }}
+                  transition={{ duration: 0.25, delay: index * 0.04 }}
                   layout
                 >
-                  <div className="cart-item-image">
-                    <img src={item.image} alt={item.name} />
+                  <div className="col-product">
+                    <div className="line-img">
+                      <img src={item.image} alt={item.name} />
+                    </div>
+                    <div className="line-info">
+                      <span className="line-name">{item.name}</span>
+                      <span className="line-sku">מק״ט: {item.sku}</span>
+                    </div>
                   </div>
 
-                  <div className="cart-item-body">
-                    <div className="cart-item-top-row">
-                      <div className="cart-item-info">
-                        <h3>{item.name}</h3>
-                        <p className="cart-item-price">₪{item.price}</p>
-                      </div>
-                      <motion.button
-                        className="remove-button"
-                        onClick={() => removeFromCart(item.id)}
-                        whileHover={{ scale: 1.15 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        </svg>
-                      </motion.button>
-                    </div>
+                  <span className="col-size">
+                    <span className="size-badge">{item.selectedSize}</span>
+                  </span>
 
-                    <div className="cart-item-bottom-row">
-                      <div className="quantity-controls">
-                        <motion.button
-                          className="quantity-button"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          whileTap={{ scale: 0.85 }}
-                        >
-                          -
-                        </motion.button>
-                        <motion.span
-                          className="quantity"
-                          key={item.quantity}
-                          initial={{ scale: 1.3 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          {item.quantity}
-                        </motion.span>
-                        <motion.button
-                          className="quantity-button"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          whileTap={{ scale: 0.85 }}
-                        >
-                          +
-                        </motion.button>
-                      </div>
-                      <span className="cart-item-total">₪{item.price * item.quantity}</span>
+                  <span className="col-price">₪{item.price}</span>
+
+                  <div className="col-qty">
+                    <div className="qty-control">
+                      <motion.button
+                        className="qty-btn"
+                        onClick={() => updateQuantity(item.cartKey, item.quantity - 1)}
+                        whileTap={{ scale: 0.8 }}
+                      >−</motion.button>
+                      <motion.span
+                        className="qty-value"
+                        key={item.quantity}
+                        initial={{ scale: 1.3 }}
+                        animate={{ scale: 1 }}
+                      >
+                        {item.quantity}
+                      </motion.span>
+                      <motion.button
+                        className="qty-btn"
+                        onClick={() => updateQuantity(item.cartKey, item.quantity + 1)}
+                        whileTap={{ scale: 0.8 }}
+                      >+</motion.button>
                     </div>
+                  </div>
+
+                  <span className="col-total">
+                    <motion.span
+                      key={item.price * item.quantity}
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                    >
+                      ₪{item.price * item.quantity}
+                    </motion.span>
+                  </span>
+
+                  <div className="col-action">
+                    <motion.button
+                      className="line-remove"
+                      onClick={() => removeFromCart(item.cartKey)}
+                      whileHover={{ scale: 1.15, color: '#ef4444' }}
+                      whileTap={{ scale: 0.85 }}
+                      title="הסר מהסל"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </motion.button>
+                  </div>
+
+                  {/* mobile-only stacked view */}
+                  <div className="line-mobile-bottom">
+                    <span className="size-badge">{item.selectedSize}</span>
+                    <div className="qty-control">
+                      <motion.button className="qty-btn" onClick={() => updateQuantity(item.cartKey, item.quantity - 1)} whileTap={{ scale: 0.8 }}>−</motion.button>
+                      <span className="qty-value">{item.quantity}</span>
+                      <motion.button className="qty-btn" onClick={() => updateQuantity(item.cartKey, item.quantity + 1)} whileTap={{ scale: 0.8 }}>+</motion.button>
+                    </div>
+                    <span className="line-total-mobile">₪{item.price * item.quantity}</span>
                   </div>
                 </motion.div>
               ))}
@@ -211,21 +167,40 @@ function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
             <div className="summary-card">
               <h3>סיכום הזמנה</h3>
 
+              <div className="summary-breakdown">
+                {cartItems.map(item => (
+                  <div key={item.cartKey} className="summary-line">
+                    <span className="summary-line-name">
+                      {item.name}
+                      <span className="summary-line-detail"> ({item.selectedSize}) ×{item.quantity}</span>
+                    </span>
+                    <span>₪{item.price * item.quantity}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="summary-divider" />
+
               <div className="summary-row">
-                <span>סה"כ פריטים:</span>
-                <span>{cartItems.reduce((total, item) => total + item.quantity, 0)}</span>
+                <span>סה״כ פריטים:</span>
+                <span>{getTotalItems()}</span>
               </div>
 
               <div className="summary-row">
-                <span>סכום ביניים:</span>
+                <span>סכום ביניים (לפני מע״מ):</span>
                 <span>₪{getTotalPrice()}</span>
               </div>
 
-              <div className="summary-divider"></div>
+              <div className="summary-row">
+                <span>מע״מ (18%):</span>
+                <span>₪{Math.round(getTotalPrice() * 0.18)}</span>
+              </div>
+
+              <div className="summary-divider" />
 
               <div className="summary-row total">
-                <span>סה"כ לתשלום:</span>
-                <span>₪{getTotalPrice()}</span>
+                <span>סה״כ לתשלום:</span>
+                <span>₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)}</span>
               </div>
 
               <motion.button
@@ -234,16 +209,18 @@ function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
                 המשך לסיום הזמנה
               </motion.button>
 
               <motion.button
                 className="continue-shopping-link"
                 onClick={() => onNavigate('catalog')}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.97 }}
               >
-                המשך בקניות
+                ← המשך בקניות
               </motion.button>
             </div>
           </motion.div>

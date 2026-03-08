@@ -1,370 +1,407 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import './Checkout.css'
 
+const WEBHOOK_URL = 'https://hook.eu2.make.com/REPLACE_WITH_YOUR_WEBHOOK_URL'
+
+const STEPS = [
+  { id: 'details', label: 'פרטים', icon: '1' },
+  { id: 'review', label: 'אימות', icon: '2' },
+  { id: 'confirm', label: 'אישור', icon: '3' }
+]
+
+function generateOrderId() {
+  const ts = Date.now().toString(36).toUpperCase()
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase()
+  return `AMR-${ts.slice(-4)}-${rand}`
+}
+
 function Checkout({ cartItems, user, onComplete }) {
+  const [step, setStep] = useState('details')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
+  const [orderResult, setOrderResult] = useState(null)
+  const formRef = useRef(null)
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
-    companyName: '',
     department: '',
-    address: '',
-    apartment: '',
-    floor: '',
-    entrance: '',
-    city: '',
-    zipCode: '',
-    deliveryDate: '',
-    notes: ''
+    site: '',
+    notes: '',
+    acceptTerms: false
   })
-  const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
+  const getTotalPrice = () =>
+    cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setIsSubmitted(true)
-
-    // מדמה שליחת הזמנה לשרת
-    setTimeout(() => {
-      onComplete()
-    }, 3000)
-  }
+  const getTotalItems = () =>
+    cartItems.reduce((total, item) => total + item.quantity, 0)
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    const { name, value, type, checked } = e.target
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
   }
 
-  if (isSubmitted) {
-    return (
-      <div className="checkout">
-        <div className="checkout-container">
-          <motion.div
-            className="success-message"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          >
-            <motion.div
-              className="success-icon"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.2 }}
-            >
-              ✓
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              ההזמנה התקבלה בהצלחה!
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
-              מספר הזמנה: #{Math.floor(Math.random() * 10000)}
-            </motion.p>
-            <motion.div
-              className="success-details"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              <p>תודה על ההזמנה, {formData.fullName}</p>
-              <p>המתנות שלך יישלחו בהקדם לכתובת שהזנת</p>
-              <p>נשלח אליך אישור בהודעת SMS למספר {formData.phone}</p>
-            </motion.div>
-            <motion.button
-              className="back-to-catalog-button"
-              onClick={onComplete}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-            >
-              חזרה לקטלוג
-            </motion.button>
-          </motion.div>
-        </div>
-      </div>
-    )
+  const goToReview = (e) => {
+    e.preventDefault()
+    if (!formRef.current.reportValidity()) return
+    setStep('review')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  const submitOrder = async () => {
+    setIsSubmitting(true)
+    setSubmitError(null)
+
+    const orderId = generateOrderId()
+    const orderPayload = {
+      orderId,
+      timestamp: new Date().toISOString(),
+      customer: {
+        idNumber: user?.idNumber || '',
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        site: formData.site
+      },
+      items: cartItems.map(item => ({
+        sku: item.sku,
+        name: item.name,
+        size: item.selectedSize,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        lineTotal: item.price * item.quantity,
+        category: item.category
+      })),
+      summary: {
+        totalItems: getTotalItems(),
+        subtotal: getTotalPrice(),
+        vat: Math.round(getTotalPrice() * 0.18),
+        total: getTotalPrice() + Math.round(getTotalPrice() * 0.18)
+      },
+      notes: formData.notes || ''
+    }
+
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+      })
+
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`)
+      }
+
+      setOrderResult({ orderId, payload: orderPayload })
+      setStep('confirm')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (err) {
+      console.error('Webhook error:', err)
+      setOrderResult({ orderId, payload: orderPayload })
+      setStep('confirm')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const stepIndex = STEPS.findIndex(s => s.id === step)
 
   return (
     <div className="checkout">
       <div className="checkout-container">
-        <motion.div
-          className="checkout-header"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <h2>סיום הזמנה</h2>
-          <p>נותרו רק מספר פרטים</p>
-        </motion.div>
+        {/* Step indicator */}
+        <div className="checkout-steps">
+          {STEPS.map((s, i) => (
+            <div key={s.id} className={`step ${i <= stepIndex ? 'active' : ''} ${i < stepIndex ? 'done' : ''}`}>
+              <div className="step-circle">
+                {i < stepIndex ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                ) : s.icon}
+              </div>
+              <span className="step-label">{s.label}</span>
+              {i < STEPS.length - 1 && <div className="step-connector" />}
+            </div>
+          ))}
+        </div>
 
-        <div className="checkout-content">
-          <motion.div
-            className="checkout-form-section"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <form onSubmit={handleSubmit} className="checkout-form">
-              <motion.div
-                className="form-section"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <h3>פרטים אישיים</h3>
+        <AnimatePresence mode="wait">
+          {/* STEP 1: Details */}
+          {step === 'details' && (
+            <motion.div
+              key="details"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="checkout-content">
+                <div className="checkout-form-section">
+                  <form ref={formRef} onSubmit={goToReview} className="checkout-form">
+                    <div className="form-section">
+                      <h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        פרטי מזמין
+                      </h3>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="fullName">שם מלא *</label>
-                    <input
-                      type="text"
-                      id="fullName"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      required
-                      placeholder="הזן שם מלא"
-                    />
-                  </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="fullName">שם מלא *</label>
+                          <input type="text" id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} required placeholder="ישראל ישראלי" />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="phone">טלפון נייד *</label>
+                          <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} required placeholder="050-1234567" />
+                        </div>
+                      </div>
 
-                  <div className="form-group">
-                    <label htmlFor="phone">טלפון נייד *</label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                      placeholder="050-1234567"
-                    />
-                  </div>
-                </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="email">אימייל *</label>
+                          <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="name@company.co.il" />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="department">חטיבה / מחלקה *</label>
+                          <input type="text" id="department" name="department" value={formData.department} onChange={handleChange} required placeholder="שם המחלקה" />
+                        </div>
+                      </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="email">אימייל *</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="name@company.com"
-                    />
-                  </div>
+                      <div className="form-group">
+                        <label htmlFor="site">אתר / מתקן (אופציונלי)</label>
+                        <input type="text" id="site" name="site" value={formData.site} onChange={handleChange} placeholder="שם האתר" />
+                      </div>
 
-                  <div className="form-group">
-                    <label htmlFor="companyName">שם חברה</label>
-                    <input
-                      type="text"
-                      id="companyName"
-                      name="companyName"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      placeholder="שם החברה"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="department">מחלקה</label>
-                  <input
-                    type="text"
-                    id="department"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    placeholder="שם המחלקה"
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="form-section"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.45 }}
-              >
-                <h3>כתובת למשלוח</h3>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="address">רחוב ומספר בית *</label>
-                    <input
-                      type="text"
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      required
-                      placeholder="רחוב הרצל 1"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="city">עיר *</label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      required
-                      placeholder="תל אביב"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row form-row-three">
-                  <div className="form-group">
-                    <label htmlFor="apartment">דירה</label>
-                    <input
-                      type="text"
-                      id="apartment"
-                      name="apartment"
-                      value={formData.apartment}
-                      onChange={handleChange}
-                      placeholder="מספר דירה"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="floor">קומה</label>
-                    <input
-                      type="text"
-                      id="floor"
-                      name="floor"
-                      value={formData.floor}
-                      onChange={handleChange}
-                      placeholder="מספר קומה"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="entrance">כניסה</label>
-                    <input
-                      type="text"
-                      id="entrance"
-                      name="entrance"
-                      value={formData.entrance}
-                      onChange={handleChange}
-                      placeholder="כניסה"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="zipCode">מיקוד</label>
-                    <input
-                      type="text"
-                      id="zipCode"
-                      name="zipCode"
-                      value={formData.zipCode}
-                      onChange={handleChange}
-                      placeholder="1234567"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="deliveryDate">תאריך משלוח מבוקש</label>
-                    <input
-                      type="date"
-                      id="deliveryDate"
-                      name="deliveryDate"
-                      value={formData.deliveryDate}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="notes">הערות למשלוח (אופציונלי)</label>
-                  <textarea
-                    id="notes"
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    rows="3"
-                    placeholder="הערות מיוחדות למשלוח"
-                  />
-                </div>
-              </motion.div>
-
-              <motion.button
-                type="submit"
-                className="submit-order-button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                אישור הזמנה
-              </motion.button>
-            </form>
-          </motion.div>
-
-          <motion.div
-            className="order-summary-section"
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <div className="order-summary-card">
-              <h3>סיכום הזמנה</h3>
-
-              <div className="summary-items">
-                {cartItems.map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    className="summary-item"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + index * 0.08 }}
-                  >
-                    <div className="summary-item-info">
-                      <span className="summary-item-name">{item.name}</span>
-                      <span className="summary-item-quantity">× {item.quantity}</span>
+                      <div className="form-group">
+                        <label htmlFor="notes">הערות להזמנה</label>
+                        <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} rows="3" placeholder="לדוגמה: רקמה מיוחדת, צבע מועדף, הערות לוגיסטיקה..." />
+                      </div>
                     </div>
-                    <span className="summary-item-price">₪{item.price * item.quantity}</span>
+
+                    <motion.button
+                      type="submit"
+                      className="step-next-btn"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      המשך לאימות הזמנה
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    </motion.button>
+                  </form>
+                </div>
+
+                <div className="order-summary-section">
+                  <OrderSummaryCard cartItems={cartItems} getTotalPrice={getTotalPrice} getTotalItems={getTotalItems} />
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* STEP 2: Review */}
+          {step === 'review' && (
+            <motion.div
+              key="review"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="review-page">
+                <div className="review-section">
+                  <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    פרטי מזמין
+                  </h3>
+                  <div className="review-grid">
+                    <div className="review-field"><span className="review-label">שם מלא</span><span className="review-value">{formData.fullName}</span></div>
+                    <div className="review-field"><span className="review-label">טלפון</span><span className="review-value" dir="ltr">{formData.phone}</span></div>
+                    <div className="review-field"><span className="review-label">אימייל</span><span className="review-value" dir="ltr">{formData.email}</span></div>
+                    <div className="review-field"><span className="review-label">מחלקה</span><span className="review-value">{formData.department}</span></div>
+                    {formData.site && <div className="review-field"><span className="review-label">אתר</span><span className="review-value">{formData.site}</span></div>}
+                  </div>
+                  <motion.button className="review-edit-btn" onClick={() => setStep('details')} whileTap={{ scale: 0.95 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    ערוך פרטים
+                  </motion.button>
+                </div>
+
+                <div className="review-section">
+                  <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    פריטים בהזמנה ({getTotalItems()})
+                  </h3>
+                  <div className="review-items-table">
+                    <div className="review-items-head">
+                      <span>מוצר</span><span>מידה</span><span>כמות</span><span>סה״כ</span>
+                    </div>
+                    {cartItems.map(item => (
+                      <div key={item.cartKey} className="review-items-row">
+                        <div className="review-item-product">
+                          <img src={item.image} alt={item.name} />
+                          <div>
+                            <span className="review-item-name">{item.name}</span>
+                            <span className="review-item-sku">מק״ט: {item.sku}</span>
+                          </div>
+                        </div>
+                        <span className="review-item-size">{item.selectedSize}</span>
+                        <span>{item.quantity}</span>
+                        <span className="review-item-total">₪{item.price * item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="review-totals">
+                  <div className="review-totals-row"><span>סכום ביניים</span><span>₪{getTotalPrice()}</span></div>
+                  <div className="review-totals-row"><span>מע״מ (18%)</span><span>₪{Math.round(getTotalPrice() * 0.18)}</span></div>
+                  <div className="review-totals-row total"><span>סה״כ לתשלום</span><span>₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)}</span></div>
+                </div>
+
+                {formData.notes && (
+                  <div className="review-notes">
+                    <strong>הערות:</strong> {formData.notes}
+                  </div>
+                )}
+
+                {submitError && (
+                  <motion.div className="submit-error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <span>⚠️ {submitError}</span>
                   </motion.div>
-                ))}
+                )}
+
+                <div className="review-actions">
+                  <motion.button className="back-btn" onClick={() => setStep('details')} whileTap={{ scale: 0.95 }}>
+                    ← חזרה לפרטים
+                  </motion.button>
+                  <motion.button
+                    className="submit-order-btn"
+                    onClick={submitOrder}
+                    disabled={isSubmitting}
+                    whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                    whileTap={!isSubmitting ? { scale: 0.97 } : {}}
+                  >
+                    {isSubmitting ? (
+                      <span className="spinner" />
+                    ) : (
+                      <>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        שליחת הזמנה
+                      </>
+                    )}
+                  </motion.button>
+                </div>
               </div>
+            </motion.div>
+          )}
 
-              <div className="summary-divider"></div>
+          {/* STEP 3: Confirmation */}
+          {step === 'confirm' && orderResult && (
+            <motion.div
+              key="confirm"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="confirm-page">
+                <motion.div
+                  className="confirm-icon"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.2 }}
+                >
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </motion.div>
 
-              <div className="summary-total">
-                <span>סה"כ לתשלום:</span>
-                <span className="total-price">₪{getTotalPrice()}</span>
+                <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+                  ההזמנה נשלחה בהצלחה!
+                </motion.h2>
+
+                <motion.div className="confirm-order-id" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+                  <span className="confirm-order-label">מספר הזמנה</span>
+                  <span className="confirm-order-number">{orderResult.orderId}</span>
+                </motion.div>
+
+                <motion.div className="confirm-details" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+                  <div className="confirm-detail-row">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>{formData.fullName}</span>
+                  </div>
+                  <div className="confirm-detail-row">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <span>{formData.department}</span>
+                  </div>
+                  <div className="confirm-detail-row">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    <span>{getTotalItems()} פריטים · ₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)} כולל מע״מ</span>
+                  </div>
+                </motion.div>
+
+                <motion.div className="confirm-notice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}>
+                  <p>📧 אישור הזמנה נשלח ל-{formData.email}</p>
+                  <p>📦 זמני אספקה: עד 4 ימי עסקים למוצרי מלאי, עד 18 ימי עסקים לפריטים עם רקמה</p>
+                  <p>📞 לשאלות צרו קשר: 03-555-5555</p>
+                </motion.div>
+
+                <motion.button
+                  className="confirm-done-btn"
+                  onClick={onComplete}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.9 }}
+                >
+                  חזרה לקטלוג
+                </motion.button>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
 
-              <div className="payment-notice">
-                <p>💳 התשלום יתבצע דרך המחלקה הפיננסית</p>
-                <p>📦 משלוח חינם לכל הארץ</p>
-                <p>🎁 אריזת מתנה מהודרת</p>
+function OrderSummaryCard({ cartItems, getTotalPrice, getTotalItems }) {
+  return (
+    <div className="order-summary-card">
+      <h3>סיכום הזמנה</h3>
+
+      <div className="summary-items">
+        {cartItems.map(item => (
+          <div key={item.cartKey} className="summary-item">
+            <div className="summary-item-left">
+              <img src={item.image} alt={item.name} className="summary-thumb" />
+              <div className="summary-item-info">
+                <span className="summary-item-name">{item.name}</span>
+                <span className="summary-item-quantity">{item.selectedSize} × {item.quantity}</span>
               </div>
             </div>
-          </motion.div>
-        </div>
+            <span className="summary-item-price">₪{item.price * item.quantity}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="summary-divider" />
+
+      <div className="summary-calc">
+        <div className="summary-calc-row"><span>סכום ביניים</span><span>₪{getTotalPrice()}</span></div>
+        <div className="summary-calc-row"><span>מע״מ (18%)</span><span>₪{Math.round(getTotalPrice() * 0.18)}</span></div>
+      </div>
+
+      <div className="summary-divider" />
+
+      <div className="summary-calc-row total">
+        <span>סה״כ</span>
+        <span>₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)}</span>
+      </div>
+
+      <div className="summary-shipping-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <span>הזמנות מתחת ל-750₪ – דמי משלוח 35₪</span>
       </div>
     </div>
   )

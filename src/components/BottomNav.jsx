@@ -14,7 +14,7 @@ function BottomNav({ cartCount, onNavigate, currentPage }) {
         <rect x="14" y="14" width="7" height="7" rx="1"/>
       </svg>
     )},
-    { id: 'cart', label: 'סל קניות', icon: (
+    { id: 'cart', label: 'סל הזמנה', icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="9" cy="21" r="1"/>
         <circle cx="20" cy="21" r="1"/>
@@ -58,10 +58,10 @@ function BottomNav({ cartCount, onNavigate, currentPage }) {
             >
               <div className="contact-sheet-handle" />
               <h3>צור קשר</h3>
-              <p className="contact-subtitle">נשמח לעזור בכל שאלה בנוגע למתנות</p>
+              <p className="contact-subtitle">נשמח לעזור בכל שאלה בנוגע לביגוד העבודה</p>
 
               <div className="contact-options">
-                <a href="mailto:gifts@amarel.net" className="contact-option">
+                <a href="mailto:workwear@amarel.net" className="contact-option">
                   <div className="contact-option-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -70,7 +70,7 @@ function BottomNav({ cartCount, onNavigate, currentPage }) {
                   </div>
                   <div className="contact-option-text">
                     <span className="contact-option-label">אימייל</span>
-                    <span className="contact-option-value">gifts@amarel.net</span>
+                    <span className="contact-option-value">workwear@amarel.net</span>
                   </div>
                 </a>
 

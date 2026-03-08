@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './App.css'
 import Login from './components/Login'
@@ -7,8 +7,8 @@ import Cart from './components/Cart'
 import Checkout from './components/Checkout'
 import Header from './components/Header'
 import BottomNav from './components/BottomNav'
-import Confetti from './components/Confetti'
-import CountdownBar from './components/CountdownBar'
+import CartDrawer from './components/CartDrawer'
+import Toast from './components/Toast'
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -26,44 +26,66 @@ function App() {
   const [currentPage, setCurrentPage] = useState('catalog')
   const [cartItems, setCartItems] = useState([])
   const [user, setUser] = useState(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [toasts, setToasts] = useState([])
+  const toastId = useRef(0)
+
+  const pushToast = useCallback((message, detail, type = 'success') => {
+    const id = ++toastId.current
+    setToasts(prev => [...prev, { id, message, detail, type }])
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id))
+    }, 3000)
+  }, [])
+
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }, [])
 
   const handleLogin = (userData) => {
     setIsAuthenticated(true)
     setUser(userData)
   }
 
-  const addToCart = (product) => {
-    const existingItem = cartItems.find(item => item.id === product.id)
-    if (existingItem) {
-      setCartItems(cartItems.map(item =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ))
-    } else {
-      setCartItems([...cartItems, { ...product, quantity: 1 }])
-    }
-  }
+  const addToCart = useCallback((product, selectedSize) => {
+    const cartKey = `${product.id}-${selectedSize}`
+    setCartItems(prev => {
+      const existing = prev.find(item => item.cartKey === cartKey)
+      if (existing) {
+        return prev.map(item =>
+          item.cartKey === cartKey
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      }
+      return [...prev, { ...product, cartKey, selectedSize, quantity: 1 }]
+    })
+    pushToast(product.name, `מידה ${selectedSize} נוסף לסל`)
+    setDrawerOpen(true)
+  }, [pushToast])
 
-  const removeFromCart = (productId) => {
-    setCartItems(cartItems.filter(item => item.id !== productId))
-  }
+  const removeFromCart = useCallback((cartKey) => {
+    setCartItems(prev => {
+      const item = prev.find(i => i.cartKey === cartKey)
+      if (item) pushToast(item.name, 'הוסר מהסל', 'error')
+      return prev.filter(i => i.cartKey !== cartKey)
+    })
+  }, [pushToast])
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = useCallback((cartKey, quantity) => {
     if (quantity === 0) {
-      removeFromCart(productId)
+      removeFromCart(cartKey)
     } else {
-      setCartItems(cartItems.map(item =>
-        item.id === productId
+      setCartItems(prev => prev.map(item =>
+        item.cartKey === cartKey
           ? { ...item, quantity }
           : item
       ))
     }
-  }
+  }, [removeFromCart])
 
-  const getCartCount = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0)
-  }
+  const getCartCount = () =>
+    cartItems.reduce((total, item) => total + item.quantity, 0)
 
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />
@@ -71,12 +93,12 @@ function App() {
 
   return (
     <div className="app">
-      <Confetti />
       <div className="app-top-bar">
-        <CountdownBar />
         <Header
           onNavigate={setCurrentPage}
           user={user}
+          cartCount={getCartCount()}
+          onCartClick={() => setDrawerOpen(true)}
         />
       </div>
 
@@ -90,9 +112,7 @@ function App() {
             exit="exit"
             transition={pageTransition}
           >
-            <Catalog
-              addToCart={addToCart}
-            />
+            <Catalog addToCart={addToCart} />
           </motion.div>
         )}
 
@@ -129,11 +149,23 @@ function App() {
               onComplete={() => {
                 setCartItems([])
                 setCurrentPage('catalog')
+                pushToast('ההזמנה נשלחה בהצלחה!', 'תודה על ההזמנה')
               }}
             />
           </motion.div>
         )}
       </AnimatePresence>
+
+      <CartDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        cartItems={cartItems}
+        updateQuantity={updateQuantity}
+        removeFromCart={removeFromCart}
+        onNavigate={setCurrentPage}
+      />
+
+      <Toast toasts={toasts} removeToast={removeToast} />
 
       <BottomNav
         cartCount={getCartCount()}

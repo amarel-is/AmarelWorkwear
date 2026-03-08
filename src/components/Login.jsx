@@ -62,7 +62,7 @@ function Login({ onLogin }) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            אתר המתנות של עובדי אמרל
+            קטלוג ביגוד עבודה
           </motion.h1>
           <motion.p
             className="login-subtitle"
@@ -70,7 +70,7 @@ function Login({ onLogin }) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
           >
-            בואו לבחור מתנות שוות
+            בחרו את הביגוד המתאים לכם
           </motion.p>
         </div>
 
