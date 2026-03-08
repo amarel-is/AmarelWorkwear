@@ -27,7 +27,13 @@ async function request(endpoint, options = {}) {
 }
 
 function parseRecord(record) {
-  return { id: record.id, createdTime: record.createdTime, ...record.fields }
+  const fields = { ...record.fields }
+  // Normalize attachment fields: Airtable returns [{url, filename, ...}]
+  // We expose a plain `image` string (first attachment's URL) for the catalog
+  if (Array.isArray(fields.image) && fields.image.length > 0) {
+    fields.image = fields.image[0].url
+  }
+  return { id: record.id, createdTime: record.createdTime, ...fields }
 }
 
 async function listAll(table, options = {}) {

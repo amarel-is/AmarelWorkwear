@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>Catalog Image Mapping</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f0f2f5; padding: 24px; }
+  h1 { margin-bottom: 8px; font-size: 22px; }
+  p { color: #666; margin-bottom: 20px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+  th { background: #1a1a2e; color: #fff; padding: 12px 16px; text-align: right; font-size: 13px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  tr:hover { background: #f8f9ff; }
+  .idx { width: 40px; color: #999; font-size: 12px; text-align: center; }
+  .img-cell { width: 140px; }
+  .img-cell img { width: 90px; height: 90px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; display: block; }
+  .img-name { font-size: 10px; color: #888; margin-top: 4px; word-break: break-all; }
+  .product-cell { }
+  .sku { display: inline-block; background: #e8f0fe; color: #1a73e8; border-radius: 4px; padding: 2px 8px; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .name { display: block; font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .cat { display: block; color: #666; font-size: 12px; margin-bottom: 4px; }
+  .rec-id { display: block; font-family: monospace; font-size: 10px; color: #aaa; }
+  .missing { color: #ccc; text-align: center; }
+  pre { background: #1a1a2e; color: #7fffb0; padding: 20px; border-radius: 8px; font-size: 12px; overflow: auto; margin-top: 32px; white-space: pre-wrap; }
+  h2 { margin-top: 32px; margin-bottom: 12px; font-size: 16px; }
+  .legend { display: flex; gap: 16px; margin-bottom: 16px; font-size: 13px; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .warn { background: #fff3cd; border: 1px solid #ffc107; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>🗂 Catalog Image ↔ Product Mapping</h1>
+<p>Check each row — left column is the extracted PDF image, right column is the Airtable product (by sort_order).</p>
+
+<div class="warn">
+  ⚠️  There are <strong>35 images</strong> and <strong>37 products</strong>.
+  <strong>Mismatch of 2</strong> — edit the mapping JSON below before uploading.
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>תמונה מהקטלוג (PDF)</th>
+      <th>מוצר ב-Airtable (לפי sort_order)</th>
+    </tr>
+  </thead>
+  <tbody><tr>
+      <td class="idx">1</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page1_img2_1000x1000.jpeg" alt="page1_img2_1000x1000.jpeg" />
+           <div class="img-name">page1_img2_1000x1000.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">101</span>
+           <span class="name">חולצת טריקו שרוול קצר</span>
+           <span class="cat">טריקו</span>
+           <span class="rec-id">recGTRgNRpF3FoYoa</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">2</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page2_img1_90x90.jpeg" alt="page2_img1_90x90.jpeg" />
+           <div class="img-name">page2_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">104</span>
+           <span class="name">חולצת טריקו שרוול ארוך</span>
+           <span class="cat">טריקו</span>
+           <span class="rec-id">recOffUZZKFddnRvz</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">3</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page3_img1_90x90.jpeg" alt="page3_img1_90x90.jpeg" />
+           <div class="img-name">page3_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1408</span>
+           <span class="name">חולצת דרייפיט מרתון שרוול קצר</span>
+           <span class="cat">דרייפיט</span>
+           <span class="rec-id">rec7mB8gQBKJjCBlP</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">4</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page3_img2_90x90.jpeg" alt="page3_img2_90x90.jpeg" />
+           <div class="img-name">page3_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">141</span>
+           <span class="name">חולצת דרייפיט שרוול ארוך</span>
+           <span class="cat">דרייפיט</span>
+           <span class="rec-id">recU9yElr0HYWNOUl</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">5</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page3_img3_90x90.jpeg" alt="page3_img3_90x90.jpeg" />
+           <div class="img-name">page3_img3_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">106</span>
+           <span class="name">חולצת פולו שרוול קצר</span>
+           <span class="cat">פולו</span>
+           <span class="rec-id">rec8cXlkQ95j5L2JX</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">6</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page3_img4_90x90.jpeg" alt="page3_img4_90x90.jpeg" />
+           <div class="img-name">page3_img4_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">103</span>
+           <span class="name">חולצת פולו קצר עם כיס</span>
+           <span class="cat">פולו</span>
+           <span class="rec-id">recGgJsLSc9kAw8qE</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">7</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page3_img5_90x90.jpeg" alt="page3_img5_90x90.jpeg" />
+           <div class="img-name">page3_img5_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">235</span>
+           <span class="name">חולצת פולו דרייפיט ללא כיס</span>
+           <span class="cat">פולו</span>
+           <span class="rec-id">recgVwb2o55XroC0s</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">8</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page4_img1_90x90.jpeg" alt="page4_img1_90x90.jpeg" />
+           <div class="img-name">page4_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">129</span>
+           <span class="name">חולצת פולו דרייפיט קצר עם כיס</span>
+           <span class="cat">פולו</span>
+           <span class="rec-id">receOd1wcysBWPAGT</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">9</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page4_img2_90x90.jpeg" alt="page4_img2_90x90.jpeg" />
+           <div class="img-name">page4_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1409</span>
+           <span class="name">חולצת פולו טקטית קצר</span>
+           <span class="cat">פולו</span>
+           <span class="rec-id">recOO1emTMLAY84fC</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">10</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page4_img3_90x90.jpeg" alt="page4_img3_90x90.jpeg" />
+           <div class="img-name">page4_img3_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">133</span>
+           <span class="name">סווטשירט עבודה 100% כותנה</span>
+           <span class="cat">סווטשירט</span>
+           <span class="rec-id">recz7y4VsWyRurvUp</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">11</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page4_img4_90x90.jpeg" alt="page4_img4_90x90.jpeg" />
+           <div class="img-name">page4_img4_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">108</span>
+           <span class="name">סווטשירט ניקי</span>
+           <span class="cat">סווטשירט</span>
+           <span class="rec-id">recvYujsHWzN4n4ux</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">12</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page4_img5_90x90.jpeg" alt="page4_img5_90x90.jpeg" />
+           <div class="img-name">page4_img5_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1410</span>
+           <span class="name">חולצה טקטית משולבת שרוול ארוך</span>
+           <span class="cat">מכופתרת</span>
+           <span class="rec-id">recuwjrgeji2WsOx6</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">13</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page4_img6_90x90.jpeg" alt="page4_img6_90x90.jpeg" />
+           <div class="img-name">page4_img6_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">310</span>
+           <span class="name">חולצת סלים מכופתרת שרוול קצר</span>
+           <span class="cat">מכופתרת</span>
+           <span class="rec-id">rec5X34dGP5rvbuwU</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">14</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page5_img1_90x90.jpeg" alt="page5_img1_90x90.jpeg" />
+           <div class="img-name">page5_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">107</span>
+           <span class="name">חולצת לקוסט שרוול ארוך עם כיס</span>
+           <span class="cat">פולו</span>
+           <span class="rec-id">rec7AvnC9TUGIv002</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">15</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page5_img2_90x90.jpeg" alt="page5_img2_90x90.jpeg" />
+           <div class="img-name">page5_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">143</span>
+           <span class="name">חולצת פולו דרייפיט שרוול ארוך + כיס</span>
+           <span class="cat">פולו</span>
+           <span class="rec-id">rechPmDYStQUAPPeq</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">16</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page5_img3_90x90.jpeg" alt="page5_img3_90x90.jpeg" />
+           <div class="img-name">page5_img3_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">978</span>
+           <span class="name">מעיל סופטשל עם פרווה</span>
+           <span class="cat">ג'קט</span>
+           <span class="rec-id">recKoqPvS2C964Gv6</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">17</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page5_img4_90x90.jpeg" alt="page5_img4_90x90.jpeg" />
+           <div class="img-name">page5_img4_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">3539</span>
+           <span class="name">מעיל סופטשל היברידי</span>
+           <span class="cat">ג'קט</span>
+           <span class="rec-id">reciWmjBIAd7N9iIm</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">18</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page6_img1_90x90.jpeg" alt="page6_img1_90x90.jpeg" />
+           <div class="img-name">page6_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">3498</span>
+           <span class="name">מעיל אלפיני</span>
+           <span class="cat">ג'קט</span>
+           <span class="rec-id">rec4NfTboYYFewDPL</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">19</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page6_img2_90x90.jpeg" alt="page6_img2_90x90.jpeg" />
+           <div class="img-name">page6_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">528N</span>
+           <span class="name">ג'קט פליז</span>
+           <span class="cat">ג'קט</span>
+           <span class="rec-id">recCBumwfTHh4U5rN</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">20</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page6_img3_90x90.jpeg" alt="page6_img3_90x90.jpeg" />
+           <div class="img-name">page6_img3_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">4211</span>
+           <span class="name">מעיל CLOUD ביטנה פליז + כובע</span>
+           <span class="cat">ג'קט</span>
+           <span class="rec-id">recNhp1jDzESLXtz0</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">21</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page6_img4_90x90.jpeg" alt="page6_img4_90x90.jpeg" />
+           <div class="img-name">page6_img4_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">31</span>
+           <span class="name">מכנסי עבודה גומי מלא</span>
+           <span class="cat">מכנסיים</span>
+           <span class="rec-id">recKzV0J9YXZiAMwE</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">22</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page6_img5_90x90.jpeg" alt="page6_img5_90x90.jpeg" />
+           <div class="img-name">page6_img5_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1334</span>
+           <span class="name">מכנסי עבודה מקצועיים PRO</span>
+           <span class="cat">מכנסיים</span>
+           <span class="rec-id">recMXwVazxMBzX1pq</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">23</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page7_img1_90x90.jpeg" alt="page7_img1_90x90.jpeg" />
+           <div class="img-name">page7_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">004</span>
+           <span class="name">מכנס דגמ"ח אינדיאני</span>
+           <span class="cat">מכנסיים</span>
+           <span class="rec-id">recA07ezmDPCPjSgH</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">24</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page7_img2_90x90.jpeg" alt="page7_img2_90x90.jpeg" />
+           <div class="img-name">page7_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">031</span>
+           <span class="name">מכנסי דגמ"ח EXTREME</span>
+           <span class="cat">מכנסיים</span>
+           <span class="rec-id">rec4GI1Uagqz3mCg8</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">25</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page7_img3_90x90.jpeg" alt="page7_img3_90x90.jpeg" />
+           <div class="img-name">page7_img3_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">219</span>
+           <span class="name">מכנסי מטיילים פטגוניה</span>
+           <span class="cat">מכנסיים</span>
+           <span class="rec-id">recIugZ65HcDU3eGt</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">26</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page7_img4_90x90.jpeg" alt="page7_img4_90x90.jpeg" />
+           <div class="img-name">page7_img4_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">3583</span>
+           <span class="name">מכנס אוסטרלי ארוך</span>
+           <span class="cat">מכנסיים</span>
+           <span class="rec-id">recaZywsPYU6Ab9vs</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">27</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page7_img5_90x90.jpeg" alt="page7_img5_90x90.jpeg" />
+           <div class="img-name">page7_img5_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">032</span>
+           <span class="name">מכנסי באדה</span>
+           <span class="cat">מכנסיים</span>
+           <span class="rec-id">reca2DSG9YNURB4t1</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">28</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page7_img6_90x90.jpeg" alt="page7_img6_90x90.jpeg" />
+           <div class="img-name">page7_img6_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">666</span>
+           <span class="name">נעל בטיחות אמיגו S3</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">recJvnysjljv1mZzy</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">29</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page8_img1_90x90.jpeg" alt="page8_img1_90x90.jpeg" />
+           <div class="img-name">page8_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1629</span>
+           <span class="name">מגף דאלאס S3 חום</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">recgZ9V2pQjII4HyE</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">30</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page8_img2_90x90.jpeg" alt="page8_img2_90x90.jpeg" />
+           <div class="img-name">page8_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1630</span>
+           <span class="name">מגף שיקגו S3L שחור</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">recVGr7aNcW4bigf7</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">31</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page8_img3_90x90.jpeg" alt="page8_img3_90x90.jpeg" />
+           <div class="img-name">page8_img3_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1572</span>
+           <span class="name">מגף צ'לסי S3 ESD חום</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">rec7tFQOMPKiYIk3t</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">32</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page9_img1_90x90.jpeg" alt="page9_img1_90x90.jpeg" />
+           <div class="img-name">page9_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1604</span>
+           <span class="name">מגף וציה S3 חום – תוצרת איטליה</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">recYEC3cTSDhBcDOF</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">33</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page9_img2_90x90.jpeg" alt="page9_img2_90x90.jpeg" />
+           <div class="img-name">page9_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1652</span>
+           <span class="name">נעל EAGLE FTG S3S חום</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">rec6jG7LSaI3HOzsG</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">34</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page10_img1_90x90.jpeg" alt="page10_img1_90x90.jpeg" />
+           <div class="img-name">page10_img1_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">1638</span>
+           <span class="name">נעל NEW SKY S3S כחול</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">recyhaNxg6XT3aICD</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">35</td>
+      <td class="img-cell">
+           <img src="../public/catalog_images/page10_img2_90x90.jpeg" alt="page10_img2_90x90.jpeg" />
+           <div class="img-name">page10_img2_90x90.jpeg</div>
+         </td>
+      <td class="product-cell">
+           <span class="sku">676</span>
+           <span class="name">נעל הידרה S3 WR CI חום</span>
+           <span class="cat">נעלי בטיחות</span>
+           <span class="rec-id">recrGCju1MUhVBXt5</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">36</td>
+      <td class="img-cell missing">—</td>
+      <td class="product-cell">
+           <span class="sku">364</span>
+           <span class="name">כובע ברש 6 פנלים</span>
+           <span class="cat">כובעים</span>
+           <span class="rec-id">recclCD5WjQJlngXp</span>
+         </td>
+    </tr>
+<tr>
+      <td class="idx">37</td>
+      <td class="img-cell missing">—</td>
+      <td class="product-cell">
+           <span class="sku">342</span>
+           <span class="name">כובע דרייפיט קל</span>
+           <span class="cat">כובעים</span>
+           <span class="rec-id">recCLLAxfJeSVU7zx</span>
+         </td>
+    </tr>
+</tbody>
+</table>
+
+<h2>📋 Mapping JSON — copy to <code>scripts/upload-images.js</code> after fixing mismatches</h2>
+<pre>[
+  {
+    "imageFile": "page1_img2_1000x1000.jpeg",
+    "sku": "101",
+    "recordId": "recGTRgNRpF3FoYoa"
+  },
+  {
+    "imageFile": "page2_img1_90x90.jpeg",
+    "sku": "104",
+    "recordId": "recOffUZZKFddnRvz"
+  },
+  {
+    "imageFile": "page3_img1_90x90.jpeg",
+    "sku": "1408",
+    "recordId": "rec7mB8gQBKJjCBlP"
+  },
+  {
+    "imageFile": "page3_img2_90x90.jpeg",
+    "sku": "141",
+    "recordId": "recU9yElr0HYWNOUl"
+  },
+  {
+    "imageFile": "page3_img3_90x90.jpeg",
+    "sku": "106",
+    "recordId": "rec8cXlkQ95j5L2JX"
+  },
+  {
+    "imageFile": "page3_img4_90x90.jpeg",
+    "sku": "103",
+    "recordId": "recGgJsLSc9kAw8qE"
+  },
+  {
+    "imageFile": "page3_img5_90x90.jpeg",
+    "sku": "235",
+    "recordId": "recgVwb2o55XroC0s"
+  },
+  {
+    "imageFile": "page4_img1_90x90.jpeg",
+    "sku": "129",
+    "recordId": "receOd1wcysBWPAGT"
+  },
+  {
+    "imageFile": "page4_img2_90x90.jpeg",
+    "sku": "1409",
+    "recordId": "recOO1emTMLAY84fC"
+  },
+  {
+    "imageFile": "page4_img3_90x90.jpeg",
+    "sku": "133",
+    "recordId": "recz7y4VsWyRurvUp"
+  },
+  {
+    "imageFile": "page4_img4_90x90.jpeg",
+    "sku": "108",
+    "recordId": "recvYujsHWzN4n4ux"
+  },
+  {
+    "imageFile": "page4_img5_90x90.jpeg",
+    "sku": "1410",
+    "recordId": "recuwjrgeji2WsOx6"
+  },
+  {
+    "imageFile": "page4_img6_90x90.jpeg",
+    "sku": "310",
+    "recordId": "rec5X34dGP5rvbuwU"
+  },
+  {
+    "imageFile": "page5_img1_90x90.jpeg",
+    "sku": "107",
+    "recordId": "rec7AvnC9TUGIv002"
+  },
+  {
+    "imageFile": "page5_img2_90x90.jpeg",
+    "sku": "143",
+    "recordId": "rechPmDYStQUAPPeq"
+  },
+  {
+    "imageFile": "page5_img3_90x90.jpeg",
+    "sku": "978",
+    "recordId": "recKoqPvS2C964Gv6"
+  },
+  {
+    "imageFile": "page5_img4_90x90.jpeg",
+    "sku": "3539",
+    "recordId": "reciWmjBIAd7N9iIm"
+  },
+  {
+    "imageFile": "page6_img1_90x90.jpeg",
+    "sku": "3498",
+    "recordId": "rec4NfTboYYFewDPL"
+  },
+  {
+    "imageFile": "page6_img2_90x90.jpeg",
+    "sku": "528N",
+    "recordId": "recCBumwfTHh4U5rN"
+  },
+  {
+    "imageFile": "page6_img3_90x90.jpeg",
+    "sku": "4211",
+    "recordId": "recNhp1jDzESLXtz0"
+  },
+  {
+    "imageFile": "page6_img4_90x90.jpeg",
+    "sku": "31",
+    "recordId": "recKzV0J9YXZiAMwE"
+  },
+  {
+    "imageFile": "page6_img5_90x90.jpeg",
+    "sku": "1334",
+    "recordId": "recMXwVazxMBzX1pq"
+  },
+  {
+    "imageFile": "page7_img1_90x90.jpeg",
+    "sku": "004",
+    "recordId": "recA07ezmDPCPjSgH"
+  },
+  {
+    "imageFile": "page7_img2_90x90.jpeg",
+    "sku": "031",
+    "recordId": "rec4GI1Uagqz3mCg8"
+  },
+  {
+    "imageFile": "page7_img3_90x90.jpeg",
+    "sku": "219",
+    "recordId": "recIugZ65HcDU3eGt"
+  },
+  {
+    "imageFile": "page7_img4_90x90.jpeg",
+    "sku": "3583",
+    "recordId": "recaZywsPYU6Ab9vs"
+  },
+  {
+    "imageFile": "page7_img5_90x90.jpeg",
+    "sku": "032",
+    "recordId": "reca2DSG9YNURB4t1"
+  },
+  {
+    "imageFile": "page7_img6_90x90.jpeg",
+    "sku": "666",
+    "recordId": "recJvnysjljv1mZzy"
+  },
+  {
+    "imageFile": "page8_img1_90x90.jpeg",
+    "sku": "1629",
+    "recordId": "recgZ9V2pQjII4HyE"
+  },
+  {
+    "imageFile": "page8_img2_90x90.jpeg",
+    "sku": "1630",
+    "recordId": "recVGr7aNcW4bigf7"
+  },
+  {
+    "imageFile": "page8_img3_90x90.jpeg",
+    "sku": "1572",
+    "recordId": "rec7tFQOMPKiYIk3t"
+  },
+  {
+    "imageFile": "page9_img1_90x90.jpeg",
+    "sku": "1604",
+    "recordId": "recYEC3cTSDhBcDOF"
+  },
+  {
+    "imageFile": "page9_img2_90x90.jpeg",
+    "sku": "1652",
+    "recordId": "rec6jG7LSaI3HOzsG"
+  },
+  {
+    "imageFile": "page10_img1_90x90.jpeg",
+    "sku": "1638",
+    "recordId": "recyhaNxg6XT3aICD"
+  },
+  {
+    "imageFile": "page10_img2_90x90.jpeg",
+    "sku": "676",
+    "recordId": "recrGCju1MUhVBXt5"
+  }
+]</pre>
+</body>
+</html>

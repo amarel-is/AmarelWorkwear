@@ -92,7 +92,8 @@ function ProductFormModal({ product, onSave, onClose, saving }) {
       price: Number(form.price) || 0,
       category: form.category,
       description: form.description,
-      image: form.image,
+      // Attachment field: wrap URL in array format Airtable expects
+      image: form.image ? [{ url: form.image }] : [],
       fabric: form.fabric || null,
       weight: form.weight || null,
       colors: form.colors ? form.colors.split(',').map(s => s.trim()).filter(Boolean) : [],
