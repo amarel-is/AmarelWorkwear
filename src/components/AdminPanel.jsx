@@ -410,10 +410,17 @@ function OrderDetail({ order }) {
           <p><strong>שם:</strong> {order.customer_name || '—'}</p>
           <p><strong>טלפון:</strong> {order.customer_phone || '—'}</p>
           <p><strong>אימייל:</strong> {order.customer_email || '—'}</p>
-          <p><strong>חברה:</strong> {order.company_name || '—'}</p>
+          <p><strong>חטיבה:</strong> {order.division || '—'}</p>
+          <p><strong>מחלקה:</strong> {order.department || '—'}</p>
+          {order.project_number && <p><strong>מס׳ פרויקט:</strong> {order.project_number}</p>}
+          {order.site && <p><strong>אתר:</strong> {order.site}</p>}
         </div>
         <div className="admin-order-detail-section">
-          <h4>הערות</h4>
+          <h4>סיכום כספי</h4>
+          <p><strong>סכום ביניים:</strong> ₪{order.subtotal || 0}</p>
+          <p><strong>מע״מ (18%):</strong> ₪{order.vat || 0}</p>
+          <p><strong>סה״כ:</strong> ₪{order.total || 0}</p>
+          <h4 style={{ marginTop: '12px' }}>הערות</h4>
           <p>{order.notes || 'אין הערות'}</p>
         </div>
       </div>
@@ -427,19 +434,23 @@ function OrderDetail({ order }) {
                 <th>מק״ט</th>
                 <th>מידה</th>
                 <th>צבע</th>
+                <th>מיתוג</th>
                 <th>כמות</th>
-                <th>מחיר</th>
+                <th>מחיר ליח׳</th>
+                <th>סה״כ</th>
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
-                <tr key={`${item.sku}-${item.size}-${item.color}`}>
+              {items.map((item, idx) => (
+                <tr key={`${item.sku}-${item.size}-${item.color}-${idx}`}>
                   <td>{item.name || '—'}</td>
                   <td>{item.sku || '—'}</td>
                   <td>{item.size || '—'}</td>
                   <td>{item.color || '—'}</td>
+                  <td>{item.branding?.requested ? `✓ ${item.branding.fileName || ''}` : '—'}</td>
                   <td>{item.quantity || 1}</td>
-                  <td>₪{item.price || 0}</td>
+                  <td>₪{item.unitPrice ?? item.price ?? 0}</td>
+                  <td>₪{item.lineTotal ?? ((item.unitPrice ?? item.price ?? 0) * (item.quantity || 1))}</td>
                 </tr>
               ))}
             </tbody>

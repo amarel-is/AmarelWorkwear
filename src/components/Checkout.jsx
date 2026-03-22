@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ordersApi } from '../lib/airtable'
+import { ordersApi, uploadAttachment } from '../lib/airtable'
+import { AMAREL_DIVISIONS } from '../data/products'
 import './Checkout.css'
 
 const WEBHOOK_URL = 'https://hook.eu2.make.com/REPLACE_WITH_YOUR_WEBHOOK_URL'
@@ -28,7 +29,9 @@ function Checkout({ cartItems, user, onComplete }) {
     fullName: '',
     email: '',
     phone: '',
+    division: '',
     department: '',
+    projectNumber: '',
     site: '',
     notes: '',
     acceptTerms: false
@@ -65,13 +68,17 @@ function Checkout({ cartItems, user, onComplete }) {
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
+        division: formData.division,
         department: formData.department,
+        projectNumber: formData.projectNumber,
         site: formData.site
       },
       items: cartItems.map(item => ({
         sku: item.sku,
         name: item.name,
         size: item.selectedSize,
+        color: item.selectedColor || '',
+        branding: item.branding ? { requested: true, fileName: item.branding.fileName } : null,
         quantity: item.quantity,
         unitPrice: item.price,
         lineTotal: item.price * item.quantity,
@@ -98,7 +105,9 @@ function Checkout({ cartItems, user, onComplete }) {
         customer_name: formData.fullName,
         customer_email: formData.email,
         customer_phone: formData.phone,
+        division: formData.division,
         department: formData.department,
+        project_number: formData.projectNumber,
         site: formData.site || '',
         items_json: JSON.stringify(orderPayload.items),
         total_items: orderPayload.summary.totalItems,
@@ -110,6 +119,15 @@ function Checkout({ cartItems, user, onComplete }) {
       }
 
       const airtablePromise = ordersApi.create(airtableFields)
+        .then(async (record) => {
+          const brandingItems = cartItems.filter(item => item.branding?.requested && item.branding?.file)
+          if (brandingItems.length > 0 && record?.id) {
+            for (const item of brandingItems) {
+              await uploadAttachment(record.id, 'branding_files', item.branding.file)
+                .catch(err => console.error('Branding upload error:', err))
+            }
+          }
+        })
         .catch(err => console.error('Airtable save error:', err))
 
       await Promise.allSettled([webhookPromise, airtablePromise])
@@ -181,8 +199,22 @@ function Checkout({ cartItems, user, onComplete }) {
                           <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="name@company.co.il" />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="department">חטיבה / מחלקה *</label>
+                          <label htmlFor="division">חטיבת אמרל *</label>
+                          <select id="division" name="division" value={formData.division} onChange={handleChange} required>
+                            <option value="">בחר חטיבה</option>
+                            {AMAREL_DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="department">מחלקה *</label>
                           <input type="text" id="department" name="department" value={formData.department} onChange={handleChange} required placeholder="שם המחלקה" />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="projectNumber">מספר פרויקט (אופציונלי)</label>
+                          <input type="text" id="projectNumber" name="projectNumber" value={formData.projectNumber} onChange={handleChange} placeholder="לדוגמה: P-2024-001" />
                         </div>
                       </div>
 
@@ -234,7 +266,9 @@ function Checkout({ cartItems, user, onComplete }) {
                     <div className="review-field"><span className="review-label">שם מלא</span><span className="review-value">{formData.fullName}</span></div>
                     <div className="review-field"><span className="review-label">טלפון</span><span className="review-value" dir="ltr">{formData.phone}</span></div>
                     <div className="review-field"><span className="review-label">אימייל</span><span className="review-value" dir="ltr">{formData.email}</span></div>
+                    <div className="review-field"><span className="review-label">חטיבה</span><span className="review-value">{formData.division}</span></div>
                     <div className="review-field"><span className="review-label">מחלקה</span><span className="review-value">{formData.department}</span></div>
+                    {formData.projectNumber && <div className="review-field"><span className="review-label">מס׳ פרויקט</span><span className="review-value">{formData.projectNumber}</span></div>}
                     {formData.site && <div className="review-field"><span className="review-label">אתר</span><span className="review-value">{formData.site}</span></div>}
                   </div>
                   <motion.button className="review-edit-btn" onClick={() => setStep('details')} whileTap={{ scale: 0.95 }}>
@@ -250,7 +284,7 @@ function Checkout({ cartItems, user, onComplete }) {
                   </h3>
                   <div className="review-items-table">
                     <div className="review-items-head">
-                      <span>מוצר</span><span>מידה</span><span>כמות</span><span>סה״כ</span>
+                      <span>מוצר</span><span>מידה / צבע</span><span>כמות</span><span>סה״כ</span>
                     </div>
                     {cartItems.map(item => (
                       <div key={item.cartKey} className="review-items-row">
@@ -259,9 +293,15 @@ function Checkout({ cartItems, user, onComplete }) {
                           <div>
                             <span className="review-item-name">{item.name}</span>
                             <span className="review-item-sku">מק״ט: {item.sku}</span>
+                            {item.branding?.requested && (
+                              <span className="review-item-branding">✦ מיתוג{item.branding.fileName ? `: ${item.branding.fileName}` : ''}</span>
+                            )}
                           </div>
                         </div>
-                        <span className="review-item-size">{item.selectedSize}</span>
+                        <div className="review-item-size-col">
+                          <span className="review-item-size">{item.selectedSize}</span>
+                          {item.selectedColor && <span className="review-item-color">{item.selectedColor}</span>}
+                        </div>
                         <span>{item.quantity}</span>
                         <span className="review-item-total">₪{item.price * item.quantity}</span>
                       </div>
@@ -415,10 +455,6 @@ function OrderSummaryCard({ cartItems, getTotalPrice }) {
         <span>₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)}</span>
       </div>
 
-      <div className="summary-shipping-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        <span>הזמנות מתחת ל-750₪ – דמי משלוח 35₪</span>
-      </div>
     </div>
   )
 }

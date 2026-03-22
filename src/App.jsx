@@ -50,8 +50,10 @@ function App() {
     setUser(userData)
   }
 
-  const addToCart = useCallback((product, selectedSize) => {
-    const cartKey = `${product.id}-${selectedSize}`
+  const addToCart = useCallback((product, selectedSize, selectedColor, branding) => {
+    const colorKey = selectedColor || ''
+    const brandingKey = branding?.requested ? '1' : '0'
+    const cartKey = `${product.id}-${selectedSize}-${colorKey}-${brandingKey}`
     setCartItems(prev => {
       const existing = prev.find(item => item.cartKey === cartKey)
       if (existing) {
@@ -61,9 +63,10 @@ function App() {
             : item
         )
       }
-      return [...prev, { ...product, cartKey, selectedSize, quantity: 1 }]
+      return [...prev, { ...product, cartKey, selectedSize, selectedColor: colorKey, branding: branding || null, quantity: 1 }]
     })
-    pushToast(product.name, `מידה ${selectedSize} נוסף לסל`)
+    const colorPart = selectedColor ? ` · ${selectedColor}` : ''
+    pushToast(product.name, `מידה ${selectedSize}${colorPart} נוסף לסל`)
     setDrawerOpen(true)
   }, [pushToast])
 

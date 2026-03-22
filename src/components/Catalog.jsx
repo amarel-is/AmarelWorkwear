@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { WORKWEAR_CATEGORIES, FALLBACK_PRODUCTS } from '../data/products'
 import { productsApi } from '../lib/airtable'
@@ -14,10 +14,8 @@ function useProducts() {
 
     let cancelled = false
     productsApi.list().then(data => {
-      if (!cancelled && data.records && data.records.length > 0) {
-        const mapped = data.records
-          .map(r => ({ id: r.id, ...r.fields }))
-          .filter(p => p.active !== false)
+      if (!cancelled && Array.isArray(data) && data.length > 0) {
+        const mapped = data.filter(p => p.active !== false)
         if (mapped.length > 0) setProducts(mapped)
       }
     }).catch(() => {})
@@ -38,12 +36,27 @@ const cardVariants = {
 
 function ProductModal({ product, onClose, onAddToCart, isAdded }) {
   const [selectedSize, setSelectedSize] = useState('')
+  const [selectedColor, setSelectedColor] = useState('')
+  const [brandingOption, setBrandingOption] = useState('none')
+  const [brandingFile, setBrandingFile] = useState(null)
+  const brandingFileRef = useRef(null)
 
   if (!product) return null
 
+  const hasColors = product.colors && product.colors.length > 0
+  const canAdd = selectedSize && (!hasColors || selectedColor)
+
   const handleAdd = () => {
-    if (!selectedSize) return
-    onAddToCart(product, selectedSize)
+    if (!canAdd) return
+    const branding = brandingOption === 'branding'
+      ? { requested: true, fileName: brandingFile?.name || '', file: brandingFile }
+      : null
+    onAddToCart(product, selectedSize, selectedColor || null, branding)
+  }
+
+  const handleBrandingFile = (e) => {
+    const file = e.target.files?.[0]
+    if (file) setBrandingFile(file)
   }
 
   return (
@@ -141,15 +154,77 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
             </div>
           </div>
 
+          {hasColors && (
+            <div className="modal-color-selector">
+              <h4>בחירת צבע</h4>
+              <div className="color-options">
+                {product.colors.map(color => (
+                  <motion.button
+                    key={color}
+                    className={`color-option ${selectedColor === color ? 'active' : ''}`}
+                    onClick={() => setSelectedColor(color)}
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.92 }}
+                  >
+                    {color}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="modal-branding-selector">
+            <h4>מיתוג</h4>
+            <div className="branding-options">
+              <motion.button
+                className={`branding-option ${brandingOption === 'none' ? 'active' : ''}`}
+                onClick={() => { setBrandingOption('none'); setBrandingFile(null) }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+              >
+                ללא מיתוג
+              </motion.button>
+              <motion.button
+                className={`branding-option ${brandingOption === 'branding' ? 'active' : ''}`}
+                onClick={() => setBrandingOption('branding')}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+              >
+                עם מיתוג
+              </motion.button>
+            </div>
+            {brandingOption === 'branding' && (
+              <div className="branding-file-upload">
+                <input
+                  ref={brandingFileRef}
+                  type="file"
+                  accept=".pdf,.ai,.eps,.png,.jpg,.svg"
+                  style={{ display: 'none' }}
+                  onChange={handleBrandingFile}
+                />
+                <motion.button
+                  className="branding-file-btn"
+                  type="button"
+                  onClick={() => brandingFileRef.current?.click()}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {brandingFile ? `✓ ${brandingFile.name}` : 'צרף קובץ מיתוג'}
+                </motion.button>
+                <span className="branding-file-hint">PDF / AI / EPS / PNG / SVG</span>
+              </div>
+            )}
+          </div>
+
           <div className="modal-footer">
             <motion.button
-              className={`modal-add-button ${isAdded ? 'added' : ''} ${!selectedSize ? 'disabled' : ''}`}
+              className={`modal-add-button ${isAdded ? 'added' : ''} ${!canAdd ? 'disabled' : ''}`}
               onClick={handleAdd}
-              whileHover={selectedSize ? { scale: 1.02 } : {}}
-              whileTap={selectedSize ? { scale: 0.97 } : {}}
-              disabled={!selectedSize}
+              whileHover={canAdd ? { scale: 1.02 } : {}}
+              whileTap={canAdd ? { scale: 0.97 } : {}}
+              disabled={!canAdd}
             >
-              {isAdded ? '✓ נוסף לסל בהצלחה' : !selectedSize ? 'יש לבחור מידה' : 'הוסף לסל'}
+              {isAdded ? '✓ נוסף לסל בהצלחה' : !selectedSize ? 'יש לבחור מידה' : hasColors && !selectedColor ? 'יש לבחור צבע' : 'הוסף לסל'}
             </motion.button>
             <div className="modal-price-display">
               <span className="price-label">מחיר</span>
@@ -187,8 +262,8 @@ function Catalog({ addToCart }) {
     return products
   }, [selectedCategory, searchQuery, allProducts])
 
-  const handleAddToCart = (product, selectedSize) => {
-    addToCart(product, selectedSize)
+  const handleAddToCart = (product, selectedSize, selectedColor, branding) => {
+    addToCart(product, selectedSize, selectedColor, branding)
     setAddedToCart(prev => ({ ...prev, [product.id]: true }))
     setTimeout(() => {
       setAddedToCart(prev => ({ ...prev, [product.id]: false }))

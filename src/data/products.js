@@ -6,6 +6,15 @@ export const WORKWEAR_CATEGORIES = [
   'מכופתרת', "ג'קט", 'מכנסיים', 'נעלי בטיחות', 'כובעים'
 ]
 
+export const AMAREL_DIVISIONS = [
+  'מטה',
+  'AES',
+  'אינטגרציות וניסויים',
+  'אימונים ומערכות אימון',
+  'אחזקה',
+  "תנופ''ה"
+]
+
 export const FALLBACK_PRODUCTS = [
   { id: 1, sku: '101', name: 'חולצת טריקו שרוול קצר', price: 12, category: 'טריקו', fabric: '100% כותנה סרוקה', weight: '160 גרם למ"ר', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop', description: 'חולצת טריקו איכותית לעבודה יומיומית', colors: ['שחור', 'לבן', 'אפור', 'נייבי'], features: ['בד נבדק ע"י מכון התקנים הישראלי', 'ללא תפרי צד לנוחות מרבית', 'צווארון סרוג בגזרה רחבה במיוחד', 'מתאים לענף המזון'], sizes: SIZES },
   { id: 2, sku: '104', name: 'חולצת טריקו שרוול ארוך', price: 17, category: 'טריקו', fabric: '100% כותנה', weight: '160 גרם למ"ר', image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&h=600&fit=crop', description: 'חולצת טריקו ארוכה לעבודה בכל עונות השנה', colors: ['שחור', 'לבן', 'אפור', 'נייבי'], features: ['בד נבדק ע"י מכון התקנים הישראלי', 'חולצה ללא תפרי צד', 'מגט בסיומת השרוולים לבטיחות מרבית', 'מתאים לענף המזון'], sizes: SIZES },

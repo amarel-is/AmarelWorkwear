@@ -78,7 +78,8 @@ function CartDrawer({ isOpen, onClose, cartItems, updateQuantity, removeFromCart
                         <div className="drawer-item-details">
                           <span className="drawer-item-name">{item.name}</span>
                           <span className="drawer-item-meta">
-                            מידה {item.selectedSize} · מק״ט {item.sku}
+                            מידה {item.selectedSize}{item.selectedColor ? ` · ${item.selectedColor}` : ''} · מק״ט {item.sku}
+                            {item.branding?.requested && <> · ✦ מיתוג</>}
                           </span>
                           <div className="drawer-item-row">
                             <div className="drawer-qty">

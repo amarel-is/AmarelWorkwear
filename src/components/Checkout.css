@@ -450,6 +450,13 @@
   color: #86868b;
 }
 
+.review-item-size-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
 .review-item-size {
   background: #f0f0f2;
   padding: 2px 8px;
@@ -457,6 +464,26 @@
   font-size: 0.8rem;
   font-weight: 600;
   width: fit-content;
+}
+
+.review-item-color {
+  font-size: 0.72rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 1px 6px;
+  width: fit-content;
+}
+
+.review-item-branding {
+  font-size: 0.7rem;
+  color: #F97316;
+  background: #FFF7ED;
+  border-radius: 4px;
+  padding: 1px 6px;
+  width: fit-content;
+  display: block;
+  margin-top: 2px;
 }
 
 .review-item-total {

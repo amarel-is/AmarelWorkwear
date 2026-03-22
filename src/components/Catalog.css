@@ -475,6 +475,114 @@
   border-color: #F97316;
 }
 
+/* ---- COLOR SELECTOR ---- */
+.modal-color-selector {
+  margin-bottom: 24px;
+}
+
+.modal-color-selector h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 10px;
+}
+
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.color-option {
+  padding: 8px 16px;
+  border: 1.5px solid #e5e5e7;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.color-option:hover {
+  border-color: #F97316;
+  background: #FFF7ED;
+}
+
+.color-option.active {
+  background: #F97316;
+  color: white;
+  border-color: #F97316;
+}
+
+/* ---- BRANDING SELECTOR ---- */
+.modal-branding-selector {
+  margin-bottom: 24px;
+}
+
+.modal-branding-selector h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 10px;
+}
+
+.branding-options {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.branding-option {
+  padding: 8px 20px;
+  border: 1.5px solid #e5e5e7;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.branding-option:hover {
+  border-color: #F97316;
+  background: #FFF7ED;
+}
+
+.branding-option.active {
+  background: #F97316;
+  color: white;
+  border-color: #F97316;
+}
+
+.branding-file-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.branding-file-btn {
+  padding: 8px 16px;
+  border: 1.5px dashed #F97316;
+  border-radius: 8px;
+  background: #FFF7ED;
+  color: #F97316;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.branding-file-btn:hover {
+  background: #FFEDD5;
+}
+
+.branding-file-hint {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
 .modal-add-button.disabled {
   background: #d1d5db;
   cursor: not-allowed;

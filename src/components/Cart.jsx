@@ -87,6 +87,8 @@ function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
                     <div className="line-info">
                       <span className="line-name">{item.name}</span>
                       <span className="line-sku">מק״ט: {item.sku}</span>
+                      {item.selectedColor && <span className="line-tag">🎨 {item.selectedColor}</span>}
+                      {item.branding?.requested && <span className="line-tag line-tag-branding">✦ מיתוג</span>}
                     </div>
                   </div>
 
@@ -172,7 +174,7 @@ function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
                   <div key={item.cartKey} className="summary-line">
                     <span className="summary-line-name">
                       {item.name}
-                      <span className="summary-line-detail"> ({item.selectedSize}) ×{item.quantity}</span>
+                      <span className="summary-line-detail"> ({item.selectedSize}{item.selectedColor ? ` · ${item.selectedColor}` : ''}) ×{item.quantity}</span>
                     </span>
                     <span>₪{item.price * item.quantity}</span>
                   </div>

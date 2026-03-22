@@ -26,13 +26,31 @@ async function request(endpoint, options = {}) {
   return res.json()
 }
 
+function toArray(value, separator = ',') {
+  if (Array.isArray(value)) return value
+  if (typeof value === 'string' && value.trim()) {
+    return value.split(separator).map(s => s.trim()).filter(Boolean)
+  }
+  return []
+}
+
 function parseRecord(record) {
   const fields = { ...record.fields }
-  // Normalize attachment fields: Airtable returns [{url, filename, ...}]
-  // We expose a plain `image` string (first attachment's URL) for the catalog
+
+  // Normalize image attachment → plain URL string
   if (Array.isArray(fields.image) && fields.image.length > 0) {
     fields.image = fields.image[0].url
   }
+
+  // Normalize comma-separated strings → arrays (Products table)
+  if ('colors' in fields) fields.colors = toArray(fields.colors)
+  if ('sizes' in fields) fields.sizes = toArray(fields.sizes)
+
+  // Normalize newline-separated string → array (Products table)
+  if ('features' in fields && !Array.isArray(fields.features)) {
+    fields.features = toArray(fields.features, '\n')
+  }
+
   return { id: record.id, createdTime: record.createdTime, ...fields }
 }
 

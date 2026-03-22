@@ -164,6 +164,20 @@
   color: #86868b;
 }
 
+.line-tag {
+  font-size: 0.7rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 1px 6px;
+  width: fit-content;
+}
+
+.line-tag-branding {
+  color: #F97316;
+  background: #FFF7ED;
+}
+
 .size-badge {
   display: inline-block;
   background: #f0f0f2;
