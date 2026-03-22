@@ -151,7 +151,7 @@ export async function uploadAttachment(recordId, fieldName, file) {
   formData.append('contentType', file.type || 'application/octet-stream')
 
   const res = await fetch(
-    `https://content.airtable.com/v0/${BASE_ID}/${recordId}/uploadAttachment/${encodeURIComponent(fieldName)}`,
+    `https://content.airtable.com/v0/${BASE_ID}/${recordId}/${encodeURIComponent(fieldName)}/uploadAttachment`,
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${PAT}` },
