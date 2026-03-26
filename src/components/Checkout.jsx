@@ -213,14 +213,9 @@ function Checkout({ cartItems, user, onComplete }) {
                           <input type="text" id="department" name="department" value={formData.department} onChange={handleChange} required placeholder="שם המחלקה" />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="projectNumber">מספר פרויקט (אופציונלי)</label>
+                          <label htmlFor="projectNumber">מספר פרויקט</label>
                           <input type="text" id="projectNumber" name="projectNumber" value={formData.projectNumber} onChange={handleChange} placeholder="לדוגמה: P-2024-001" />
                         </div>
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="site">אתר / מתקן (אופציונלי)</label>
-                        <input type="text" id="site" name="site" value={formData.site} onChange={handleChange} placeholder="שם האתר" />
                       </div>
 
                       <div className="form-group">
@@ -269,7 +264,6 @@ function Checkout({ cartItems, user, onComplete }) {
                     <div className="review-field"><span className="review-label">חטיבה</span><span className="review-value">{formData.division}</span></div>
                     <div className="review-field"><span className="review-label">מחלקה</span><span className="review-value">{formData.department}</span></div>
                     {formData.projectNumber && <div className="review-field"><span className="review-label">מס׳ פרויקט</span><span className="review-value">{formData.projectNumber}</span></div>}
-                    {formData.site && <div className="review-field"><span className="review-label">אתר</span><span className="review-value">{formData.site}</span></div>}
                   </div>
                   <motion.button className="review-edit-btn" onClick={() => setStep('details')} whileTap={{ scale: 0.95 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -310,9 +304,9 @@ function Checkout({ cartItems, user, onComplete }) {
                 </div>
 
                 <div className="review-totals">
-                  <div className="review-totals-row"><span>סכום ביניים</span><span>₪{getTotalPrice()}</span></div>
+                  <div className="review-totals-row"><span>סכום ביניים (לפני מע״מ)</span><span>₪{getTotalPrice()}</span></div>
                   <div className="review-totals-row"><span>מע״מ (18%)</span><span>₪{Math.round(getTotalPrice() * 0.18)}</span></div>
-                  <div className="review-totals-row total"><span>סה״כ לתשלום</span><span>₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)}</span></div>
+                  <div className="review-totals-row total"><span>סה״כ לתשלום (כולל מע״מ)</span><span>₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)}</span></div>
                 </div>
 
                 {formData.notes && (
@@ -444,14 +438,14 @@ function OrderSummaryCard({ cartItems, getTotalPrice }) {
       <div className="summary-divider" />
 
       <div className="summary-calc">
-        <div className="summary-calc-row"><span>סכום ביניים</span><span>₪{getTotalPrice()}</span></div>
+        <div className="summary-calc-row"><span>סכום ביניים (לפני מע״מ)</span><span>₪{getTotalPrice()}</span></div>
         <div className="summary-calc-row"><span>מע״מ (18%)</span><span>₪{Math.round(getTotalPrice() * 0.18)}</span></div>
       </div>
 
       <div className="summary-divider" />
 
       <div className="summary-calc-row total">
-        <span>סה״כ</span>
+        <span>סה״כ כולל מע״מ</span>
         <span>₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)}</span>
       </div>
 

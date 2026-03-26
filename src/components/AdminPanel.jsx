@@ -417,9 +417,9 @@ function OrderDetail({ order }) {
         </div>
         <div className="admin-order-detail-section">
           <h4>סיכום כספי</h4>
-          <p><strong>סכום ביניים:</strong> ₪{order.subtotal || 0}</p>
+          <p><strong>סכום ביניים (לפני מע״מ):</strong> ₪{order.subtotal || 0}</p>
           <p><strong>מע״מ (18%):</strong> ₪{order.vat || 0}</p>
-          <p><strong>סה״כ:</strong> ₪{order.total || 0}</p>
+          <p><strong>סה״כ (כולל מע״מ):</strong> ₪{order.total || 0}</p>
           <h4 style={{ marginTop: '12px' }}>הערות</h4>
           <p>{order.notes || 'אין הערות'}</p>
         </div>

@@ -144,6 +144,19 @@
   background: #f5f5f7;
 }
 
+.img-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .gift-image {
   width: 100%;
   height: 100%;
@@ -487,32 +500,36 @@
   margin-bottom: 10px;
 }
 
+.selected-color-label {
+  font-weight: 400;
+  color: #6b7280;
+}
+
 .color-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
-.color-option {
-  padding: 8px 16px;
-  border: 1.5px solid #e5e5e7;
-  border-radius: 8px;
-  background: white;
-  font-size: 0.875rem;
-  font-weight: 500;
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--swatch-color);
+  border: 2px solid rgba(0, 0, 0, 0.12);
   cursor: pointer;
-  transition: all 0.15s ease;
+  padding: 0;
+  outline: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-.color-option:hover {
-  border-color: #F97316;
-  background: #FFF7ED;
+.color-swatch:hover {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.35), 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-.color-option.active {
-  background: #F97316;
-  color: white;
-  border-color: #F97316;
+.color-swatch.active {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4.5px #F97316;
 }
 
 /* ---- BRANDING SELECTOR ---- */
@@ -581,6 +598,58 @@
 .branding-file-hint {
   font-size: 0.75rem;
   color: #6b7280;
+}
+
+.modal-quantity-selector {
+  margin-bottom: 24px;
+}
+
+.modal-quantity-selector h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 10px;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1.5px solid #e5e5e7;
+  border-radius: 10px;
+  width: fit-content;
+  overflow: hidden;
+}
+
+.quantity-btn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: white;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #1d1d1f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.quantity-btn:hover {
+  background: #f5f5f7;
+}
+
+.quantity-value {
+  min-width: 42px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  border-right: 1.5px solid #e5e5e7;
+  border-left: 1.5px solid #e5e5e7;
+  padding: 0 8px;
+  line-height: 38px;
 }
 
 .modal-add-button.disabled {

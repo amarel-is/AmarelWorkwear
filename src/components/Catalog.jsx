@@ -4,6 +4,25 @@ import { WORKWEAR_CATEGORIES, FALLBACK_PRODUCTS } from '../data/products'
 import { productsApi } from '../lib/airtable'
 import './Catalog.css'
 
+const COLOR_MAP = {
+  'שחור':        '#1a1a1a',
+  'לבן':         '#ffffff',
+  'אפור עכבר':   '#6b7280',
+  'אפור':        '#9ca3af',
+  'אפור בהיר':   '#d1d5db',
+  'כחול כהה':    '#1e3a5f',
+  'כחול':        '#2563eb',
+  'כחול בהיר':   '#60a5fa',
+  'נייבי':       '#1d3461',
+  'חאקי':        '#8a7f5e',
+  'ירוק':        '#16a34a',
+  'צהוב':        '#facc15',
+  'כתום':        '#f97316',
+  'אדום':        '#dc2626',
+  'בורדו':       '#7f1d1d',
+  'חום':         '#92400e',
+}
+
 function useProducts() {
   const [products, setProducts] = useState(FALLBACK_PRODUCTS)
 
@@ -39,6 +58,7 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
   const [selectedColor, setSelectedColor] = useState('')
   const [brandingOption, setBrandingOption] = useState('none')
   const [brandingFile, setBrandingFile] = useState(null)
+  const [quantity, setQuantity] = useState(1)
   const brandingFileRef = useRef(null)
 
   if (!product) return null
@@ -51,7 +71,7 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
     const branding = brandingOption === 'branding'
       ? { requested: true, fileName: brandingFile?.name || '', file: brandingFile }
       : null
-    onAddToCart(product, selectedSize, selectedColor || null, branding)
+    onAddToCart(product, selectedSize, selectedColor || null, branding, quantity)
   }
 
   const handleBrandingFile = (e) => {
@@ -95,7 +115,7 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
 
           <div className="modal-details-grid">
             <div className="modal-detail-card">
-              <span className="modal-detail-label">מחיר ליחידה</span>
+              <span className="modal-detail-label">מחיר ליחידה (לא כולל מע״מ)</span>
               <span className="modal-detail-value price">₪{product.price}</span>
             </div>
             {product.fabric && (
@@ -156,18 +176,18 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
 
           {hasColors && (
             <div className="modal-color-selector">
-              <h4>בחירת צבע</h4>
+              <h4>בחירת צבע{selectedColor && <span className="selected-color-label"> — {selectedColor}</span>}</h4>
               <div className="color-options">
                 {product.colors.map(color => (
                   <motion.button
                     key={color}
-                    className={`color-option ${selectedColor === color ? 'active' : ''}`}
+                    title={color}
+                    className={`color-swatch ${selectedColor === color ? 'active' : ''}`}
+                    style={{ '--swatch-color': COLOR_MAP[color] ?? '#cccccc' }}
                     onClick={() => setSelectedColor(color)}
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.92 }}
-                  >
-                    {color}
-                  </motion.button>
+                    whileHover={{ scale: 1.12 }}
+                    whileTap={{ scale: 0.9 }}
+                  />
                 ))}
               </div>
             </div>
@@ -216,6 +236,29 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
             )}
           </div>
 
+          <div className="modal-quantity-selector">
+            <h4>כמות</h4>
+            <div className="quantity-controls">
+              <motion.button
+                className="quantity-btn"
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                −
+              </motion.button>
+              <span className="quantity-value">{quantity}</span>
+              <motion.button
+                className="quantity-btn"
+                onClick={() => setQuantity(q => q + 1)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                +
+              </motion.button>
+            </div>
+          </div>
+
           <div className="modal-footer">
             <motion.button
               className={`modal-add-button ${isAdded ? 'added' : ''} ${!canAdd ? 'disabled' : ''}`}
@@ -227,8 +270,8 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
               {isAdded ? '✓ נוסף לסל בהצלחה' : !selectedSize ? 'יש לבחור מידה' : hasColors && !selectedColor ? 'יש לבחור צבע' : 'הוסף לסל'}
             </motion.button>
             <div className="modal-price-display">
-              <span className="price-label">מחיר</span>
-              <span className="price-value">₪{product.price}</span>
+              <span className="price-label">סה״כ (לא כולל מע״מ)</span>
+              <span className="price-value">₪{product.price * quantity}</span>
             </div>
           </div>
         </div>
@@ -262,8 +305,8 @@ function Catalog({ addToCart }) {
     return products
   }, [selectedCategory, searchQuery, allProducts])
 
-  const handleAddToCart = (product, selectedSize, selectedColor, branding) => {
-    addToCart(product, selectedSize, selectedColor, branding)
+  const handleAddToCart = (product, selectedSize, selectedColor, branding, quantity) => {
+    addToCart(product, selectedSize, selectedColor, branding, quantity)
     setAddedToCart(prev => ({ ...prev, [product.id]: true }))
     setTimeout(() => {
       setAddedToCart(prev => ({ ...prev, [product.id]: false }))
@@ -358,6 +401,7 @@ function Catalog({ addToCart }) {
                 onClick={() => setSelectedProduct(product)}
               >
                 <div className="gift-image-wrapper">
+                  {!imageLoaded[product.id] && <div className="img-skeleton" />}
                   <motion.img
                     src={product.image}
                     alt={product.name}

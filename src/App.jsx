@@ -50,7 +50,7 @@ function App() {
     setUser(userData)
   }
 
-  const addToCart = useCallback((product, selectedSize, selectedColor, branding) => {
+  const addToCart = useCallback((product, selectedSize, selectedColor, branding, quantity = 1) => {
     const colorKey = selectedColor || ''
     const brandingKey = branding?.requested ? '1' : '0'
     const cartKey = `${product.id}-${selectedSize}-${colorKey}-${brandingKey}`
@@ -59,11 +59,11 @@ function App() {
       if (existing) {
         return prev.map(item =>
           item.cartKey === cartKey
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       }
-      return [...prev, { ...product, cartKey, selectedSize, selectedColor: colorKey, branding: branding || null, quantity: 1 }]
+      return [...prev, { ...product, cartKey, selectedSize, selectedColor: colorKey, branding: branding || null, quantity }]
     })
     const colorPart = selectedColor ? ` · ${selectedColor}` : ''
     pushToast(product.name, `מידה ${selectedSize}${colorPart} נוסף לסל`)
