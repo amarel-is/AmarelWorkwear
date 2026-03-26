@@ -183,7 +183,7 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
                     key={color}
                     title={color}
                     className={`color-swatch ${selectedColor === color ? 'active' : ''}`}
-                    style={{ '--swatch-color': COLOR_MAP[color] ?? '#cccccc' }}
+                    style={{ backgroundColor: COLOR_MAP[color.trim()] ?? '#cccccc' }}
                     onClick={() => setSelectedColor(color)}
                     whileHover={{ scale: 1.12 }}
                     whileTap={{ scale: 0.9 }}

@@ -509,13 +509,13 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  direction: ltr;
 }
 
 .color-swatch {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: var(--swatch-color);
   border: 2px solid rgba(0, 0, 0, 0.12);
   cursor: pointer;
   padding: 0;
