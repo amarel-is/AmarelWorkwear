@@ -408,10 +408,9 @@ function OrderDetail({ order }) {
         <div className="admin-order-detail-section">
           <h4>פרטי לקוח</h4>
           <p><strong>שם:</strong> {order.customer_name || '—'}</p>
-          <p><strong>טלפון:</strong> {order.customer_phone || '—'}</p>
           <p><strong>אימייל:</strong> {order.customer_email || '—'}</p>
           <p><strong>חטיבה:</strong> {order.division || '—'}</p>
-          <p><strong>מחלקה:</strong> {order.department || '—'}</p>
+          {order.project_name && <p><strong>שם פרויקט:</strong> {order.project_name}</p>}
           {order.project_number && <p><strong>מס׳ פרויקט:</strong> {order.project_number}</p>}
           {order.site && <p><strong>אתר:</strong> {order.site}</p>}
         </div>
@@ -469,6 +468,8 @@ function OrdersTab() {
   const [error, setError] = useState('')
   const [expandedOrder, setExpandedOrder] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
+  const [projectQuery, setProjectQuery] = useState('')
+  const [projectSort, setProjectSort] = useState('none')
 
   const fetchOrders = useCallback(async () => {
     setLoading(true)
@@ -511,6 +512,33 @@ function OrdersTab() {
     }
   }
 
+  const normalizeProjectQuery = (value) => value.replace(/\s+/g, '').toUpperCase()
+
+  const getProjectNumberValue = (value) => {
+    if (!value) return null
+    const digits = String(value).toUpperCase().replace(/^PR/, '').replace(/\D+/g, '')
+    return digits ? Number(digits) : null
+  }
+
+  const filteredOrders = orders.filter(order => {
+    const query = normalizeProjectQuery(projectQuery)
+    if (!query) return true
+    const projectNumber = String(order.project_number || '').toUpperCase()
+    if (projectNumber.includes(query)) return true
+    const projectDigits = projectNumber.replace(/^PR/, '')
+    return projectDigits.includes(query.replace(/^PR/, ''))
+  })
+
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    if (projectSort === 'none') return 0
+    const aVal = getProjectNumberValue(a.project_number)
+    const bVal = getProjectNumberValue(b.project_number)
+    if (aVal === null && bVal === null) return 0
+    if (aVal === null) return 1
+    if (bVal === null) return -1
+    return projectSort === 'asc' ? aVal - bVal : bVal - aVal
+  })
+
   if (loading) return <div className="admin-loading">טוען הזמנות...</div>
   if (error) return <div className="admin-error">{error}<button type="button" onClick={fetchOrders} className="admin-btn admin-btn-secondary">נסה שוב</button></div>
 
@@ -520,8 +548,33 @@ function OrdersTab() {
         <h2>הזמנות ({orders.length})</h2>
         <button type="button" className="admin-btn admin-btn-secondary" onClick={fetchOrders}>רענן</button>
       </div>
+      <div className="admin-order-controls">
+        <label className="admin-order-filter">
+          <span>סינון לפי מס׳ פרויקט</span>
+          <input
+            type="text"
+            value={projectQuery}
+            onChange={e => setProjectQuery(e.target.value)}
+            placeholder="PR12345 או 12345"
+            className="admin-input"
+            dir="ltr"
+          />
+        </label>
+        <label className="admin-order-filter">
+          <span>מיון</span>
+          <select
+            value={projectSort}
+            onChange={e => setProjectSort(e.target.value)}
+            className="admin-select"
+          >
+            <option value="none">ללא</option>
+            <option value="asc">מס׳ פרויקט: נמוך → גבוה</option>
+            <option value="desc">מס׳ פרויקט: גבוה → נמוך</option>
+          </select>
+        </label>
+      </div>
 
-      {orders.length === 0 ? (
+      {sortedOrders.length === 0 ? (
         <div className="admin-empty">אין הזמנות עדיין</div>
       ) : (
         <div className="admin-table-wrap">
@@ -530,13 +583,15 @@ function OrdersTab() {
               <tr>
                 <th>מס׳ הזמנה</th>
                 <th>לקוח</th>
+                <th>מס׳ פרויקט</th>
+                <th>שם פרויקט</th>
                 <th>תאריך</th>
                 <th>סה״כ</th>
                 <th>סטטוס</th>
               </tr>
             </thead>
             <tbody>
-              {orders.map(order => (
+              {sortedOrders.map(order => (
                 <OrderRow
                   key={order.id}
                   order={order}
@@ -562,6 +617,8 @@ function OrderRow({ order, expanded, onToggle, onStatusChange, updatingId, getSt
       <tr className={`admin-order-row ${expanded ? 'expanded' : ''}`} onClick={onToggle} onKeyDown={e => e.key === 'Enter' && onToggle()}>
         <td>{order.order_id || order.id}</td>
         <td>{order.customer_name || '—'}</td>
+        <td>{order.project_number || '—'}</td>
+        <td>{order.project_name || '—'}</td>
         <td>{formatDate(order.created_at || order.createdTime)}</td>
         <td>₪{order.total || 0}</td>
         <td onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
@@ -579,7 +636,7 @@ function OrderRow({ order, expanded, onToggle, onStatusChange, updatingId, getSt
       </tr>
       {expanded && (
         <tr className="admin-order-detail-row">
-          <td colSpan={5}>
+          <td colSpan={7}>
             <OrderDetail order={order} />
           </td>
         </tr>

@@ -28,9 +28,8 @@ function Checkout({ cartItems, user, onComplete }) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    phone: '',
     division: '',
-    department: '',
+    projectName: '',
     projectNumber: '',
     site: '',
     notes: '',
@@ -45,6 +44,11 @@ function Checkout({ cartItems, user, onComplete }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
+    if (name === 'projectNumber') {
+      const digitsOnly = value.replace(/\D+/g, '')
+      setFormData(prev => ({ ...prev, projectNumber: digitsOnly }))
+      return
+    }
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
   }
 
@@ -67,10 +71,9 @@ function Checkout({ cartItems, user, onComplete }) {
         idNumber: user?.idNumber || '',
         fullName: formData.fullName,
         email: formData.email,
-        phone: formData.phone,
         division: formData.division,
-        department: formData.department,
-        projectNumber: formData.projectNumber,
+        projectName: formData.projectName,
+        projectNumber: `PR${formData.projectNumber}`,
         site: formData.site
       },
       items: cartItems.map(item => ({
@@ -104,10 +107,9 @@ function Checkout({ cartItems, user, onComplete }) {
         order_id: orderId,
         customer_name: formData.fullName,
         customer_email: formData.email,
-        customer_phone: formData.phone,
         division: formData.division,
-        department: formData.department,
-        project_number: formData.projectNumber,
+        project_name: formData.projectName || '',
+        project_number: `PR${formData.projectNumber}`,
         site: formData.site || '',
         items_json: JSON.stringify(orderPayload.items),
         total_items: orderPayload.summary.totalItems,
@@ -188,16 +190,12 @@ function Checkout({ cartItems, user, onComplete }) {
                           <input type="text" id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} required placeholder="ישראל ישראלי" />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="phone">טלפון נייד *</label>
-                          <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} required placeholder="050-1234567" />
+                          <label htmlFor="email">אימייל *</label>
+                          <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="name@company.co.il" />
                         </div>
                       </div>
 
                       <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="email">אימייל *</label>
-                          <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="name@company.co.il" />
-                        </div>
                         <div className="form-group">
                           <label htmlFor="division">חטיבת אמרל *</label>
                           <select id="division" name="division" value={formData.division} onChange={handleChange} required>
@@ -205,16 +203,28 @@ function Checkout({ cartItems, user, onComplete }) {
                             {AMAREL_DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
                           </select>
                         </div>
+                        <div className="form-group">
+                          <label htmlFor="projectName">שם פרויקט</label>
+                          <input type="text" id="projectName" name="projectName" value={formData.projectName} onChange={handleChange} placeholder="שם הפרויקט" />
+                        </div>
                       </div>
 
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="department">מחלקה *</label>
-                          <input type="text" id="department" name="department" value={formData.department} onChange={handleChange} required placeholder="שם המחלקה" />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="projectNumber">מספר פרויקט</label>
-                          <input type="text" id="projectNumber" name="projectNumber" value={formData.projectNumber} onChange={handleChange} placeholder="לדוגמה: P-2024-001" />
+                      <div className="form-group">
+                        <label htmlFor="projectNumber">מספר פרויקט *</label>
+                        <div className="input-with-prefix" dir="ltr">
+                          <span className="input-prefix">PR</span>
+                          <input
+                            type="text"
+                            id="projectNumber"
+                            name="projectNumber"
+                            value={formData.projectNumber}
+                            onChange={handleChange}
+                            required
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="123456"
+                            dir="ltr"
+                          />
                         </div>
                       </div>
 
@@ -259,11 +269,10 @@ function Checkout({ cartItems, user, onComplete }) {
                   </h3>
                   <div className="review-grid">
                     <div className="review-field"><span className="review-label">שם מלא</span><span className="review-value">{formData.fullName}</span></div>
-                    <div className="review-field"><span className="review-label">טלפון</span><span className="review-value" dir="ltr">{formData.phone}</span></div>
                     <div className="review-field"><span className="review-label">אימייל</span><span className="review-value" dir="ltr">{formData.email}</span></div>
                     <div className="review-field"><span className="review-label">חטיבה</span><span className="review-value">{formData.division}</span></div>
-                    <div className="review-field"><span className="review-label">מחלקה</span><span className="review-value">{formData.department}</span></div>
-                    {formData.projectNumber && <div className="review-field"><span className="review-label">מס׳ פרויקט</span><span className="review-value">{formData.projectNumber}</span></div>}
+                    {formData.projectName && <div className="review-field"><span className="review-label">שם פרויקט</span><span className="review-value">{formData.projectName}</span></div>}
+                    <div className="review-field"><span className="review-label">מס׳ פרויקט</span><span className="review-value" dir="ltr">PR{formData.projectNumber}</span></div>
                   </div>
                   <motion.button className="review-edit-btn" onClick={() => setStep('details')} whileTap={{ scale: 0.95 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -379,18 +388,12 @@ function Checkout({ cartItems, user, onComplete }) {
                   </div>
                   <div className="confirm-detail-row">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                    <span>{formData.department}</span>
+                    <span>{formData.projectName || `PR${formData.projectNumber}`}</span>
                   </div>
                   <div className="confirm-detail-row">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                     <span>{getTotalItems()} פריטים · ₪{getTotalPrice() + Math.round(getTotalPrice() * 0.18)} כולל מע״מ</span>
                   </div>
-                </motion.div>
-
-                <motion.div className="confirm-notice" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}>
-                  <p>📧 אישור הזמנה נשלח ל-{formData.email}</p>
-                  <p>📦 זמני אספקה: עד 4 ימי עסקים למוצרי מלאי, עד 18 ימי עסקים לפריטים עם רקמה</p>
-                  <p>📞 לשאלות צרו קשר: 03-555-5555</p>
                 </motion.div>
 
                 <motion.button
