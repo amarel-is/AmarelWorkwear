@@ -66,7 +66,7 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
   if (!product) return null
 
   const colorImagesMap = product.color_images || {}
-  const lightboxItems = product.colors && product.colors.length > 0
+  const lightboxItems = (product.colors && Array.isArray(product.colors) && product.colors.length > 0)
     ? product.colors.map(color => ({ src: colorImagesMap[color] || product.image, color }))
     : [{ src: product.image, color: null }]
   const uniqueLightboxItems = Array.from(new Map(lightboxItems.map(item => [item.src, item])).values())
