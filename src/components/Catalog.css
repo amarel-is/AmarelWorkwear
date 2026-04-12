@@ -308,8 +308,8 @@
 
 .modal-close {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 12px;
+  left: 12px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -330,13 +330,29 @@
 
 .modal-image {
   width: 100%;
-  aspect-ratio: 16/9;
-  object-fit: cover;
+  max-height: 60vh;
+  object-fit: contain;
   border-radius: 24px 24px 0 0;
+  background: #f7f7f7;
 }
 
 .modal-body {
-  padding: 28px;
+  padding: 24px;
+}
+
+@media (max-width: 640px) {
+  .modal-content {
+    border-radius: 18px;
+    max-height: 95vh;
+  }
+
+  .modal-image {
+    max-height: 45vh;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
 }
 
 .modal-category {
