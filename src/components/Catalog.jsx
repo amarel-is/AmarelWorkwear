@@ -59,9 +59,29 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
   const [brandingOption, setBrandingOption] = useState('none')
   const [brandingFile, setBrandingFile] = useState(null)
   const [quantity, setQuantity] = useState(1)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
   const brandingFileRef = useRef(null)
 
   if (!product) return null
+
+  const colorImagesMap = product.color_images || {}
+  const lightboxItems = product.colors && product.colors.length > 0
+    ? product.colors.map(color => ({ src: colorImagesMap[color] || product.image, color }))
+    : [{ src: product.image, color: null }]
+  const uniqueLightboxItems = Array.from(new Map(lightboxItems.map(item => [item.src, item])).values())
+  const activeImageSrc = product.color_images?.[selectedColor] ?? product.image
+  const currentLightboxItem = uniqueLightboxItems[lightboxIndex] || uniqueLightboxItems[0]
+
+  const openLightbox = () => {
+    const initialIndex = uniqueLightboxItems.findIndex(item => item.src === activeImageSrc)
+    setLightboxIndex(initialIndex >= 0 ? initialIndex : 0)
+    setLightboxOpen(true)
+  }
+
+  const closeLightbox = () => setLightboxOpen(false)
+  const prevLightbox = () => setLightboxIndex(index => (index - 1 + uniqueLightboxItems.length) % uniqueLightboxItems.length)
+  const nextLightbox = () => setLightboxIndex(index => (index + 1) % uniqueLightboxItems.length)
 
   const hasColors = product.colors && product.colors.length > 0
   const canAdd = selectedSize && (!hasColors || selectedColor)
@@ -104,7 +124,26 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
           ✕
         </motion.button>
 
-        <img src={product.color_images?.[selectedColor] ?? product.image} alt={product.name} className="modal-image" />
+        <div className="modal-image-wrapper">
+          <img
+            src={activeImageSrc}
+            alt={product.name}
+            className="modal-image"
+            loading="lazy"
+            onClick={openLightbox}
+          />
+          <button
+            type="button"
+            className="image-zoom-button"
+            onClick={openLightbox}
+            title="פתח בגלריית תמונות"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </button>
+        </div>
 
         <div className="modal-body">
           <span className="modal-category">{product.category}</span>
@@ -275,6 +314,38 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
             </div>
           </div>
         </div>
+
+        <AnimatePresence>
+          {lightboxOpen && (
+            <motion.div
+              className="lightbox-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="lightbox-backdrop" onClick={closeLightbox} />
+              <motion.div
+                className="lightbox-content"
+                initial={{ scale: 0.96, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.96, y: 20 }}
+              >
+                <button className="lightbox-close" onClick={closeLightbox} type="button" aria-label="Close image lightbox">✕</button>
+                {uniqueLightboxItems.length > 1 && (
+                  <button className="lightbox-nav prev" onClick={prevLightbox} type="button" aria-label="Previous image">‹</button>
+                )}
+                <img src={currentLightboxItem.src} alt={product.name} className="lightbox-image" />
+                {uniqueLightboxItems.length > 1 && (
+                  <button className="lightbox-nav next" onClick={nextLightbox} type="button" aria-label="Next image">›</button>
+                )}
+                {currentLightboxItem.color && (
+                  <div className="lightbox-caption">{currentLightboxItem.color}</div>
+                )}
+                <div className="lightbox-counter">{lightboxIndex + 1}/{uniqueLightboxItems.length}</div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   )
