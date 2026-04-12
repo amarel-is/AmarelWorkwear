@@ -73,7 +73,7 @@ function CartDrawer({ isOpen, onClose, cartItems, updateQuantity, removeFromCart
                         transition={{ duration: 0.25 }}
                       >
                         <div className="drawer-item-img">
-                          <img src={item.image} alt={item.name} />
+                          <img src={item.selectedImage || item.image} alt={item.name} />
                         </div>
                         <div className="drawer-item-details">
                           <span className="drawer-item-name">{item.name}</span>

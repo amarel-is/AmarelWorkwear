@@ -16,7 +16,7 @@ export const AMAREL_DIVISIONS = [
 ]
 
 export const FALLBACK_PRODUCTS = [
-  { id: 1, sku: '101', name: 'חולצת טריקו שרוול קצר', price: 12, category: 'טריקו', fabric: '100% כותנה סרוקה', weight: '160 גרם למ"ר', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop', description: 'חולצת טריקו איכותית לעבודה יומיומית', colors: ['שחור', 'לבן', 'אפור', 'נייבי'], features: ['בד נבדק ע"י מכון התקנים הישראלי', 'ללא תפרי צד לנוחות מרבית', 'צווארון סרוג בגזרה רחבה במיוחד', 'מתאים לענף המזון'], sizes: SIZES },
+  { id: 1, sku: '101', name: 'חולצת טריקו שרוול קצר', price: 12, category: 'טריקו', fabric: '100% כותנה סרוקה', weight: '160 גרם למ"ר', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop', description: 'חולצת טריקו איכותית לעבודה יומיומית', colors: ['שחור', 'לבן', 'אפור', 'נייבי'], features: ['בד נבדק ע"י מכון התקנים הישראלי', 'ללא תפרי צד לנוחות מרבית', 'צווארון סרוג בגזרה רחבה במיוחד', 'מתאים לענף המזון'], color_images: {"שחור":"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop","לבן":"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop","אפור":"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop","נייבי":"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop"}, sizes: SIZES },
   { id: 2, sku: '104', name: 'חולצת טריקו שרוול ארוך', price: 17, category: 'טריקו', fabric: '100% כותנה', weight: '160 גרם למ"ר', image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&h=600&fit=crop', description: 'חולצת טריקו ארוכה לעבודה בכל עונות השנה', colors: ['שחור', 'לבן', 'אפור', 'נייבי'], features: ['בד נבדק ע"י מכון התקנים הישראלי', 'חולצה ללא תפרי צד', 'מגט בסיומת השרוולים לבטיחות מרבית', 'מתאים לענף המזון'], sizes: SIZES },
   { id: 3, sku: '1408', name: 'חולצת דרייפיט מרתון שרוול קצר', price: 11, category: 'דרייפיט', fabric: '100% פוליאסטר', weight: '130 גרם', image: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600&h=600&fit=crop', description: 'מותאמת לאקלים הישראלי, קלה ונושמת לנוחות מקסימלית', colors: ['שחור', 'נייבי', 'לבן', 'אפור', 'פטרול'], features: ['בד דק ונושם – שרוול רגלן', 'משקל בד 130 גרם', 'מידות S-5XL', 'ייבוש מהיר ומנדפת זיעה'], sizes: SIZES },
   { id: 4, sku: '141', name: 'חולצת דרייפיט שרוול ארוך', price: 20, category: 'דרייפיט', fabric: '100% פוליאסטר', weight: '140 גרם למ"ר', image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=600&fit=crop', description: 'בד עדין ואיכותי לנוחות מרבית בלבישה', colors: ['כחול כהה', 'שחור', 'אפור'], features: ['בד 100% פוליאסטר עדין במיוחד ללבישה', 'גזרה רחבה לעבודה', 'יכולת ידוף זיעה גבוהה המתאימה לאקלים הישראלי', 'בדיקת ידוף זיעה בוצעה במעבדת שקר'], sizes: SIZES },
@@ -69,6 +69,7 @@ export function normalizeAirtableProduct(record) {
     colors: Array.isArray(record.colors) ? record.colors : (record.colors ? [record.colors] : []),
     sizes: Array.isArray(record.sizes) ? record.sizes : (record.sizes ? record.sizes.split(',').map(s => s.trim()) : SIZES),
     features: Array.isArray(record.features) ? record.features : (record.features ? record.features.split('\n').filter(Boolean) : []),
+    color_images: record.color_images || null,
     active: record.active !== false,
     sort_order: record.sort_order || 0
   }

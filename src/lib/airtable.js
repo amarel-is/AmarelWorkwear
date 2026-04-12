@@ -51,6 +51,15 @@ function parseRecord(record) {
     fields.features = toArray(fields.features, '\n')
   }
 
+  // Parse color_images JSON string
+  if ('color_images' in fields && typeof fields.color_images === 'string') {
+    try {
+      fields.color_images = JSON.parse(fields.color_images)
+    } catch {
+      fields.color_images = null
+    }
+  }
+
   return { id: record.id, createdTime: record.createdTime, ...fields }
 }
 

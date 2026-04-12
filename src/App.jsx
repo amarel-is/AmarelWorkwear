@@ -63,7 +63,7 @@ function App() {
             : item
         )
       }
-      return [...prev, { ...product, cartKey, selectedSize, selectedColor: colorKey, branding: branding || null, quantity }]
+      return [...prev, { ...product, cartKey, selectedSize, selectedColor: colorKey, branding: branding || null, quantity, selectedImage: product.color_images?.[selectedColor] ?? product.image }]
     })
     const colorPart = selectedColor ? ` · ${selectedColor}` : ''
     pushToast(product.name, `מידה ${selectedSize}${colorPart} נוסף לסל`)

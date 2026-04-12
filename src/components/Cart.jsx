@@ -82,7 +82,7 @@ function Cart({ cartItems, updateQuantity, removeFromCart, onNavigate }) {
                 >
                   <div className="col-product">
                     <div className="line-img">
-                      <img src={item.image} alt={item.name} />
+                      <img src={item.selectedImage || item.image} alt={item.name} />
                     </div>
                     <div className="line-info">
                       <span className="line-name">{item.name}</span>

@@ -292,7 +292,7 @@ function Checkout({ cartItems, user, onComplete }) {
                     {cartItems.map(item => (
                       <div key={item.cartKey} className="review-items-row">
                         <div className="review-item-product">
-                          <img src={item.image} alt={item.name} />
+                          <img src={item.selectedImage || item.image} alt={item.name} />
                           <div>
                             <span className="review-item-name">{item.name}</span>
                             <span className="review-item-sku">מק״ט: {item.sku}</span>
@@ -427,7 +427,7 @@ function OrderSummaryCard({ cartItems, getTotalPrice }) {
         {cartItems.map(item => (
           <div key={item.cartKey} className="summary-item">
             <div className="summary-item-left">
-              <img src={item.image} alt={item.name} className="summary-thumb" />
+              <img src={item.selectedImage || item.image} alt={item.name} className="summary-thumb" />
               <div className="summary-item-info">
                 <span className="summary-item-name">{item.name}</span>
                 <span className="summary-item-quantity">{item.selectedSize} × {item.quantity}</span>

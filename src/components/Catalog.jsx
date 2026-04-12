@@ -104,7 +104,7 @@ function ProductModal({ product, onClose, onAddToCart, isAdded }) {
           ✕
         </motion.button>
 
-        <img src={product.image} alt={product.name} className="modal-image" />
+        <img src={product.color_images?.[selectedColor] ?? product.image} alt={product.name} className="modal-image" />
 
         <div className="modal-body">
           <span className="modal-category">{product.category}</span>
@@ -403,7 +403,7 @@ function Catalog({ addToCart }) {
                 <div className="gift-image-wrapper">
                   {!imageLoaded[product.id] && <div className="img-skeleton" />}
                   <motion.img
-                    src={product.image}
+                    src={product.color_images ? Object.values(product.color_images)[0] : product.image}
                     alt={product.name}
                     className={`gift-image ${imageLoaded[product.id] ? 'loaded' : ''}`}
                     loading="lazy"
