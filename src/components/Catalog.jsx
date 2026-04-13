@@ -510,23 +510,23 @@ function Catalog({ addToCart }) {
                         בחר מידה
                       </motion.button>
                     </div>
-                  </div>
-                </div>
-                {product.colors?.length > 0 && (
-                  <div className="gift-card-swatches">
-                    {product.colors.slice(0, 9).map(color => (
-                      <span
-                        key={color}
-                        title={color}
-                        className="gift-card-swatch"
-                        style={{ background: COLOR_MAP[color.trim()] ?? '#cccccc' }}
-                      />
-                    ))}
-                    {product.colors.length > 9 && (
-                      <span className="gift-card-swatch-more">+{product.colors.length - 9}</span>
+                    {product.colors?.length > 0 && (
+                      <div className="gift-card-swatches">
+                        {product.colors.slice(0, 9).map(color => (
+                          <span
+                            key={color}
+                            title={color}
+                            className="gift-card-swatch"
+                            style={{ background: COLOR_MAP[color.trim()] ?? '#cccccc' }}
+                          />
+                        ))}
+                        {product.colors.length > 9 && (
+                          <span className="gift-card-swatch-more">+{product.colors.length - 9}</span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>

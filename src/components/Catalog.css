@@ -149,14 +149,15 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
-/* Color swatches — outside the white card box */
+/* Color swatches — inside the card, below the footer */
 .gift-card-swatches {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-wrap: wrap;
   gap: 5px;
-  padding: 8px 6px 4px;
+  padding: 8px 0 2px;
+  border-top: 1px solid #f0f0f2;
+  margin-top: 6px;
 }
 
 .gift-card-swatch {
@@ -166,7 +167,7 @@
   display: inline-block;
   flex-shrink: 0;
   border: 2px solid white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transition: transform 0.15s;
 }
 
