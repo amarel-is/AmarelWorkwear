@@ -153,7 +153,8 @@
 .gift-card-swatches {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  direction: rtl;
   flex-wrap: wrap;
   gap: 5px;
   padding: 8px 0 2px;
@@ -722,7 +723,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  direction: rtl;
 }
 
 .color-swatch {
