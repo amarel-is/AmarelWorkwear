@@ -471,46 +471,62 @@ function Catalog({ addToCart }) {
                 layout
                 onClick={() => setSelectedProduct(product)}
               >
-                <div className="gift-image-wrapper">
-                  {!imageLoaded[product.id] && <div className="img-skeleton" />}
-                  <motion.img
-                    src={product.color_images ? Object.values(product.color_images)[0] : product.image}
-                    alt={product.name}
-                    className={`gift-image ${imageLoaded[product.id] ? 'loaded' : ''}`}
-                    loading="lazy"
-                    onLoad={() => setImageLoaded(prev => ({ ...prev, [product.id]: true }))}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.4 }}
-                  />
-                  <span className="gift-category-tag">{product.category}</span>
-                </div>
-                <div className="gift-info">
-                  <div className="gift-info-top">
-                    <span className="gift-sku">מק״ט: {product.sku}</span>
+                <div className="gift-card-inner">
+                  <div className="gift-image-wrapper">
+                    {!imageLoaded[product.id] && <div className="img-skeleton" />}
+                    <motion.img
+                      src={product.color_images ? Object.values(product.color_images)[0] : product.image}
+                      alt={product.name}
+                      className={`gift-image ${imageLoaded[product.id] ? 'loaded' : ''}`}
+                      loading="lazy"
+                      onLoad={() => setImageLoaded(prev => ({ ...prev, [product.id]: true }))}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4 }}
+                    />
+                    <span className="gift-category-tag">{product.category}</span>
                   </div>
-                  <h3>{product.name}</h3>
-                  <p className="gift-description">{product.description}</p>
-                  <div className="gift-meta">
-                    {product.fabric && <span className="gift-supplier">{product.fabric}</span>}
-                    {product.colors && (
-                      <span className="gift-exchange-value">{product.colors.length} צבעים</span>
+                  <div className="gift-info">
+                    <div className="gift-info-top">
+                      <span className="gift-sku">מק״ט: {product.sku}</span>
+                    </div>
+                    <h3>{product.name}</h3>
+                    <p className="gift-description">{product.description}</p>
+                    {product.fabric && (
+                      <div className="gift-meta">
+                        <span className="gift-supplier">{product.fabric}</span>
+                      </div>
+                    )}
+                    <div className="gift-footer">
+                      <span className="gift-price">₪{product.price}</span>
+                      <motion.button
+                        className="add-to-cart-button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedProduct(product)
+                        }}
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.92 }}
+                      >
+                        בחר מידה
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+                {product.colors?.length > 0 && (
+                  <div className="gift-card-swatches">
+                    {product.colors.slice(0, 9).map(color => (
+                      <span
+                        key={color}
+                        title={color}
+                        className="gift-card-swatch"
+                        style={{ background: COLOR_MAP[color.trim()] ?? '#cccccc' }}
+                      />
+                    ))}
+                    {product.colors.length > 9 && (
+                      <span className="gift-card-swatch-more">+{product.colors.length - 9}</span>
                     )}
                   </div>
-                  <div className="gift-footer">
-                    <span className="gift-price">₪{product.price}</span>
-                    <motion.button
-                      className="add-to-cart-button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setSelectedProduct(product)
-                      }}
-                      whileHover={{ scale: 1.06 }}
-                      whileTap={{ scale: 0.92 }}
-                    >
-                      בחר מידה
-                    </motion.button>
-                  </div>
-                </div>
+                )}
               </motion.div>
             ))}
           </AnimatePresence>

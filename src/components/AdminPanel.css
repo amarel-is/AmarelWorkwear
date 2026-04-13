@@ -837,3 +837,232 @@ select.admin-badge {
   color: #6b7280;
   word-break: break-all;
 }
+
+/* ── Color Picker Field ── */
+
+.admin-color-field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-color-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.admin-color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-color-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.admin-color-chips:hover {
+  border-color: #F97316;
+}
+
+.admin-color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 3px 8px 3px 6px;
+  cursor: default;
+}
+
+.admin-color-chip-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+.admin-color-chip-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.admin-color-chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 10px;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-color-chip-remove:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.admin-color-add-btn {
+  font-size: 12px;
+  color: #9ca3af;
+  padding: 3px 8px;
+  border: 1.5px dashed #d1d5db;
+  border-radius: 20px;
+  transition: all 0.15s;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-color-chips:hover .admin-color-add-btn {
+  border-color: #F97316;
+  color: #F97316;
+}
+
+/* Picker panel */
+.admin-color-picker-panel {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.admin-color-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.admin-color-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 4px;
+}
+
+.admin-color-preset-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.admin-color-preset-btn:hover:not(:disabled) {
+  background: #f5f5f7;
+  border-color: #e5e7eb;
+}
+
+.admin-color-preset-btn.selected {
+  background: #f0fdf4;
+  border-color: #34c759;
+  cursor: default;
+}
+
+.admin-color-preset-btn:disabled {
+  opacity: 0.6;
+}
+
+.admin-color-preset-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: block;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  flex-shrink: 0;
+}
+
+.admin-color-preset-name {
+  font-size: 10px;
+  color: #475569;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  line-height: 1.3;
+}
+
+/* Custom color row */
+.admin-color-custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-color-hex-picker {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1.5px solid #e5e7eb;
+  padding: 3px;
+  cursor: pointer;
+  background: none;
+  flex-shrink: 0;
+}
+
+.admin-color-hex-value {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: #6b7280;
+  direction: ltr;
+  min-width: 58px;
+  user-select: all;
+}
+
+.admin-color-custom-name {
+  flex: 1;
+  min-width: 120px;
+  padding: 9px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fafafa;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.admin-color-custom-name:focus {
+  outline: none;
+  border-color: #F97316;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.08);
+}
+
+.admin-color-custom-add {
+  padding: 9px 16px !important;
+  font-size: 13px !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

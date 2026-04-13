@@ -128,13 +128,56 @@
 }
 
 .gift-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.gift-card-inner {
   background: white;
   border-radius: var(--border-radius);
   overflow: hidden;
-  cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
+  flex: 1;
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.gift-card:hover .gift-card-inner {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Color swatches — outside the white card box */
+.gift-card-swatches {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 8px 6px 4px;
+}
+
+.gift-card-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  transition: transform 0.15s;
+}
+
+.gift-card:hover .gift-card-swatch {
+  transform: scale(1.15);
+}
+
+.gift-card-swatch-more {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #86868b;
 }
 
 .gift-image-wrapper {

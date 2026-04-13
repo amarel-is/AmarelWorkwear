@@ -3,6 +3,121 @@ import { productsApi, ordersApi, uploadAttachment } from '../lib/airtable'
 import { WORKWEAR_CATEGORIES } from '../data/products'
 import './AdminPanel.css'
 
+const ADMIN_COLOR_PRESETS = [
+  { name: 'שחור',      hex: '#1a1a1a' },
+  { name: 'לבן',       hex: '#ffffff' },
+  { name: 'אפור',      hex: '#9ca3af' },
+  { name: 'אפור עכבר', hex: '#6b7280' },
+  { name: 'אפור בהיר', hex: '#d1d5db' },
+  { name: 'נייבי',     hex: '#1d3461' },
+  { name: 'כחול כהה',  hex: '#1e3a5f' },
+  { name: 'כחול',      hex: '#2563eb' },
+  { name: 'כחול בהיר', hex: '#60a5fa' },
+  { name: 'חאקי',      hex: '#8a7f5e' },
+  { name: 'זית',       hex: '#6b7c3a' },
+  { name: 'ירוק',      hex: '#16a34a' },
+  { name: 'צהוב',      hex: '#facc15' },
+  { name: 'כתום',      hex: '#f97316' },
+  { name: 'אדום',      hex: '#dc2626' },
+  { name: 'בורדו',     hex: '#7f1d1d' },
+  { name: 'חום',       hex: '#92400e' },
+  { name: 'קאמל',      hex: '#c4a06a' },
+]
+
+function ColorPickerField({ value, onChange }) {
+  const colors = value ? value.split(',').map(s => s.trim()).filter(Boolean) : []
+  const [open, setOpen] = useState(false)
+  const [customName, setCustomName] = useState('')
+  const [customHex, setCustomHex] = useState('#888888')
+
+  const getHex = (name) =>
+    ADMIN_COLOR_PRESETS.find(p => p.name === name)?.hex ?? '#cccccc'
+
+  const addColor = (name) => {
+    const trimmed = name.trim()
+    if (!trimmed || colors.includes(trimmed)) return
+    onChange([...colors, trimmed].join(', '))
+  }
+
+  const removeColor = (name) =>
+    onChange(colors.filter(c => c !== name).join(', '))
+
+  const addCustom = () => {
+    if (!customName.trim()) return
+    addColor(customName.trim())
+    setCustomName('')
+    setCustomHex('#888888')
+  }
+
+  return (
+    <div className="admin-color-field">
+      <div className="admin-color-chips" onClick={() => setOpen(o => !o)}>
+        {colors.map(color => (
+          <span key={color} className="admin-color-chip" onClick={e => e.stopPropagation()}>
+            <span className="admin-color-chip-dot" style={{ background: getHex(color), outline: getHex(color) === '#ffffff' ? '1.5px solid #e5e7eb' : 'none', outlineOffset: '0' }} />
+            <span className="admin-color-chip-name">{color}</span>
+            <button type="button" className="admin-color-chip-remove" onClick={() => removeColor(color)}>✕</button>
+          </span>
+        ))}
+        <span className="admin-color-add-btn">+ הוסף צבע</span>
+      </div>
+
+      {open && (
+        <div className="admin-color-picker-panel">
+          <p className="admin-color-section-label">צבעים נפוצים</p>
+          <div className="admin-color-presets-grid">
+            {ADMIN_COLOR_PRESETS.map(preset => (
+              <button
+                key={preset.name}
+                type="button"
+                title={preset.name}
+                className={`admin-color-preset-btn ${colors.includes(preset.name) ? 'selected' : ''}`}
+                onClick={() => { if (!colors.includes(preset.name)) addColor(preset.name) }}
+                disabled={colors.includes(preset.name)}
+              >
+                <span
+                  className="admin-color-preset-dot"
+                  style={{ background: preset.hex, border: preset.hex === '#ffffff' ? '2px solid #e5e7eb' : 'none' }}
+                />
+                <span className="admin-color-preset-name">{preset.name}</span>
+              </button>
+            ))}
+          </div>
+
+          <p className="admin-color-section-label">צבע מותאם אישית</p>
+          <div className="admin-color-custom-row">
+            <input
+              type="color"
+              value={customHex}
+              onChange={e => setCustomHex(e.target.value)}
+              className="admin-color-hex-picker"
+              title="בחר גוון"
+            />
+            <span className="admin-color-hex-value">{customHex}</span>
+            <input
+              type="text"
+              value={customName}
+              onChange={e => setCustomName(e.target.value)}
+              placeholder="שם הצבע..."
+              className="admin-color-custom-name"
+              dir="rtl"
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom() } }}
+            />
+            <button
+              type="button"
+              className="admin-btn admin-btn-primary admin-color-custom-add"
+              onClick={addCustom}
+              disabled={!customName.trim()}
+            >
+              הוסף
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const ORDER_STATUSES = [
   { value: 'pending', label: 'ממתין', color: 'yellow' },
   { value: 'approved', label: 'אושר', color: 'blue' },
@@ -211,10 +326,10 @@ function ProductFormModal({ product, onSave, onClose, saving }) {
               <input type="text" value={form.weight} onChange={e => set('weight', e.target.value)} />
             </label>
           </div>
-          <label>
-            <span>צבעים (מופרדים בפסיק)</span>
-            <input type="text" value={form.colors} onChange={e => set('colors', e.target.value)} placeholder="שחור, לבן, אפור" />
-          </label>
+          <div className="admin-color-field-wrap">
+            <span className="admin-color-field-label">צבעים</span>
+            <ColorPickerField value={form.colors} onChange={v => set('colors', v)} />
+          </div>
           <label>
             <span>מאפיינים (כל מאפיין בשורה חדשה)</span>
             <textarea value={form.features} onChange={e => set('features', e.target.value)} rows={3} />
