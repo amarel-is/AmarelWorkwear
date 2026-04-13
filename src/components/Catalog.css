@@ -153,6 +153,7 @@
 .gift-card-swatches {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 5px;
   padding: 8px 0 2px;
@@ -721,7 +722,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  direction: ltr;
+  justify-content: flex-end;
 }
 
 .color-swatch {
@@ -1015,13 +1016,14 @@
 
   /* modal mobile */
   .modal-overlay {
-    padding: 10px;
-    align-items: flex-end;
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
   }
 
   .modal-content {
-    max-height: 85vh;
-    border-radius: 20px 20px 0 0;
+    max-height: 88vh;
+    border-radius: 20px;
   }
 
   .modal-image {
